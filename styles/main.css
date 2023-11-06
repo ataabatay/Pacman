@@ -93,13 +93,11 @@ button.start-play {
 /* Classes */
 /* Regular cell - Empty available grid class*/
 .cell {
+  font-Size: 5px;
+  border-radius: 5px;
   background-position: center;
-  background-size: cover;
   background-repeat: no-repeat;
-  background-Color: white;
-  color: black;
-  font-Size: 4px;
-  border: 0.1px solid lightblue;
+  text-align: center;
 }
 
 /* out of bounds cell - walls and other cells the sprites cannot go*/
@@ -109,35 +107,66 @@ button.start-play {
 
 /* food - regular food class*/
 .food {
-  background-color: var(--food);
+  background-image: url(../assets/pacmanfood.png);
+  background-size: 20%;
 }
 
 /* power pellet - power up food cell*/
 .powerPellet {
   background-image: url(../assets/powerpellet.gif);
+  background-size: 75%;
 }
 
 /* Pacman */
 .pacman {
-  background-image: url(../assets/Pac-Man.png);
+  background-image: url(../assets/pacman.gif);
+  background-size: 120%;
 }
 
 /* Blinky - enemy*/
 .blinky {
-  background-image: url(../assets/Pac-Man.png);
+  background-image: url(../assets/blinky.gif);
+  background-size: 100%;
 }
 
 /* Pinky - enemy*/
 .pinky {
-  background-image: url(../assets/Pac-Man.png);
+  background-image: url(../assets/pinky.gif);
+  background-size: 100%;
 }
 
 /* Inky - enemy*/
 .inky {
-  background-image: url(../assets/Pac-Man.png);
+  background-image: url(../assets/inky.gif);
+  background-size: 100%;
 }
 
 /* Clyde - enemy*/
 .clyde {
-  background-image: url(../assets/Pac-Man.png);
+  background-image: url(../assets/clyde.gif);
+  background-size: 100%;
+}
+
+/* Vulnerable state for enemies */
+.vulnerable {
+  background-image: url(../assets/vulnerable.gif);
+  background-size: 100%;
+}
+
+.lives {
+  display: flex;
+  flex-direction: column;
+  color: white;
+  margin-top: 1em;
+}
+
+.lives-remaining {
+  height: 20%;
+  display: flex;
+}
+
+.life {
+  background-image: url(../assets/pacman.gif);
+  background-size: 100%;
+  margin: 5px;
 }
