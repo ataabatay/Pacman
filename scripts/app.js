@@ -32,6 +32,13 @@ const remainingLives = document.querySelector('.lives-remaining')
 // cells - every individual cell that's created with the createGrid() function
 const cells = []
 
+// Directions array to use for random ghost movement
+// 0: up
+// 1: right
+// 2: down
+// 3: left
+const directions = ['up', 'right', 'down', 'left']
+
 // available lives
 let lives = null
 
@@ -288,13 +295,9 @@ const sprites = [
   }
 ]
 
-// currentScore - score in the active gameplay
 // highScore - high score to be stored inside the localstorage for persistence
 
-
-
 // Functions
-
 // screen swapper to move from screen to screen
 function swapScreen(gameState) {
   // hide all screens to decide which one to show later
@@ -302,7 +305,6 @@ function swapScreen(gameState) {
   // show the relevant screen
   gameStates[gameState].classList.remove('hidden')
 }
-
 
 // createGrid() - function to create a grid where the game will be played
 function createGrid() {
@@ -358,7 +360,7 @@ function createGrid() {
   }
   addSprites()
 
-  // function to set lives to 3 at the beginning of the game and display
+  // function to set lives to 3 at the beginning of the game and display lives
   lives = 3
   function addLives() {
     for (let i = 0; i < lives; i++) {
@@ -372,9 +374,9 @@ function createGrid() {
     }
   }
   addLives()
+  blinkyMovement()
 }
 createGrid()
-
 
 // startGame() - function to run when the start button is 'clicked'
 function startGame() {
@@ -391,29 +393,38 @@ function startGame() {
   createGrid()
 }
 
-// move() - function to make Pacman move around the screen
-function movePacman(newPosition) {
-  if (cells[newPosition].classList.contains('food')) {
-    currentScore += 10
-    // Remove food screen when Pacman eats it
-    cells[newPosition].classList.remove('food')
-  } else if (cells[newPosition].classList.contains('powerPellet')) {
-    currentScore += 50
-    // Remove power pellet from screen when Pacman eats it
-    cells[newPosition].classList.remove('powerPellet')
-    // TO ADD: vulnerability and bonus mode to chase ghosts add as a function
-  }
-  currentScoreDisplay.innerText = parseFloat(currentScore)
-  cells[newPosition].classList.add('pacman')
-}
-
-function removePacman() {
-  cells[sprites[sprites.findIndex(element => element.name === 'pacman')].currentPos].classList.remove('pacman')
+// handling life loss when Pacman touches a ghost 
+function removeLife () {
+  // if lives = 0 cue the game over screen and stop the game
+  // if lives - 1 > 0, 
+  // reduce life by 1
+  // restart the level: 
+  // all sprites go back to their starting location
 }
 
 // movement is enabled by keydown style
 // When Pacman changes position (moves) - a value is added to the current position based on the key pressed and updating current position and repeating every time that event happens
 function keyPress(evt) { 
+  // move() - function to make Pacman move around the screen
+  function movePacman(newPosition) {
+    if (cells[newPosition].classList.contains('food')) {
+      currentScore += 10
+      // Remove food screen when Pacman eats it
+      cells[newPosition].classList.remove('food')
+    } else if (cells[newPosition].classList.contains('powerPellet')) {
+      currentScore += 50
+      // Remove power pellet from screen when Pacman eats it
+      cells[newPosition].classList.remove('powerPellet')
+      // TO ADD: vulnerability and bonus mode to chase ghosts add as a function
+    }
+    currentScoreDisplay.innerText = parseFloat(currentScore)
+    cells[newPosition].classList.add('pacman')
+  }
+  
+  // remove() - function to remove Pacman from the previous cell
+  function removePacman() {
+    cells[sprites[0].currentPos].classList.remove('pacman')
+  }
   // remove pacman from current location
   removePacman()
   // listen to which key is pressed and check to ensure the cell to move does not have oob class
@@ -437,12 +448,41 @@ function keyPress(evt) {
   movePacman(sprites[0].currentPos)
 }
 
+// REREAD AND REWORK RIGHT NOW ITS JUST BAD
+function blinkyMovement() {
+  // REREAD AND REWORK RIGHT NOW ITS JUST BAD
+  function removeBlinky() {
+    cells[sprites[1].currentPos].classList.remove('blinky')
+  }
+  
+  // REREAD AND REWORK RIGHT NOW ITS JUST BAD
+  function moveBlinky(newPosition) {
+    cells[newPosition].classList.add('blinky')
+  }
+  // choose a random direction
+  let activeDirection = null
+  // reset the random direction every second
+  setInterval(function randomMovement() {
+    removeBlinky()
+    activeDirection = directions[Math.floor(Math.random() * directions.length)]
+    if (activeDirection === 'right' && sprites[1].currentPos === 419) {
+      sprites[1].currentPos = 392
+    } else if (activeDirection === 'left' && sprites[1].currentPos === 392) {
+      sprites[1].currentPos = 419
+    } else if (activeDirection === 'up' && !cells[sprites[1].currentPos - stdWidth].classList.contains('oob')) {
+      sprites[1].currentPos -= stdWidth
+    } else if (activeDirection === 'right' && !cells[sprites[1].currentPos + 1].classList.contains('oob')) {
+      sprites[1].currentPos++
+    } else if (activeDirection === 'down' && !cells[sprites[1].currentPos + stdWidth].classList.contains('oob')) {
+      sprites[1].currentPos += stdWidth
+    } else if (activeDirection === 'left' && !cells[sprites[1].currentPos - 1].classList.contains('oob')) {
+      sprites[1].currentPos--
+    }
+    moveBlinky(sprites[1].currentPos)
+  }, 300)
+}
 
-// 
 // Increase currentscore by 10 + if highscore <= currentscore update highscore as well
-
-// ghostsMove() - function that runs as long as gameRunning is true
-// ???
 
 // Event Listeners
 // startbutton.onclick.run startGame eventlistener
