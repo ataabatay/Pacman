@@ -1,11 +1,13 @@
 :root {
 --btn-bg: #eec64c;
 --menu-bg: #ffdf01;
-
+--oob: #2121ff;
+--food: #fab9b0;
 }
 
 * {
   box-sizing: border-box;
+  font-family: 'Press Start 2P', sans-serif;
 }
 
 html {
@@ -21,7 +23,6 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: aliceblue;
   min-height: 100vh;
   background-color: var(--menu-bg);
 }
@@ -31,10 +32,112 @@ body {
 }
 
 button.start-play {
-  height: 50px;
-  width: 75px;
+  width: 10%;
+  height: 45px;
+  cursor:pointer;
   border: black solid 2px;
   border-radius: 5px;
   box-shadow: 2px 2px red;
   background-color: var(--btn-bg);
+}
+
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: black;
+}
+
+.loading-screen h1 {
+  color: white;
+}
+
+.gameplay-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 100vh;
+  background-color: black;
+}
+
+.grid-wrapper {
+  width: 800px;
+}
+
+.scores {
+  display: flex;
+  flex-direction: row;
+  color: white;
+  text-align: center;
+  justify-content: space-between;
+  margin-bottom: 1em;
+  margin-top: 1em;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  width: 800px;
+  color: white;
+}
+
+.hidden {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Classes */
+/* Regular cell - Empty available grid class*/
+.cell {
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-Color: white;
+  color: black;
+  font-Size: 4px;
+  border: 0.1px solid lightblue;
+}
+
+/* out of bounds cell - walls and other cells the sprites cannot go*/
+.oob {
+  background-Color: var(--oob);
+}
+
+/* food - regular food class*/
+.food {
+  background-color: var(--food);
+}
+
+/* power pellet - power up food cell*/
+.powerPellet {
+  background-image: url(../assets/powerpellet.gif);
+}
+
+/* Pacman */
+.pacman {
+  background-image: url(../assets/Pac-Man.png);
+}
+
+/* Blinky - enemy*/
+.blinky {
+  background-image: url(../assets/Pac-Man.png);
+}
+
+/* Pinky - enemy*/
+.pinky {
+  background-image: url(../assets/Pac-Man.png);
+}
+
+/* Inky - enemy*/
+.inky {
+  background-image: url(../assets/Pac-Man.png);
+}
+
+/* Clyde - enemy*/
+.clyde {
+  background-image: url(../assets/Pac-Man.png);
 }

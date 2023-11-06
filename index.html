@@ -4,19 +4,51 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pac-Man</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles/main.css">
   <script defer src="./scripts/app.js"></script>
 </head>
 <body>
 
-  <section class="start-menu gamestate0">
+  <!-- <section class="start-menu gamestate">
     <img class="pacmanLogo" src="./assets/Pac-Man.png" alt="pacman-logo">
     <button class="start-play">PLAY</button>
   </section>
 
-  <!-- <section class="loading-screen">
-    <img src="./assets/loading-gif.gif" alt="">
+  <section class="loading-screen gamestate">
+    <h1>LOADING</h1>z
+    <img class="loadGif" src="./assets/loadingscreen.gif" alt="">
   </section> -->
+
+  <section class="gameplay-screen gamestate">
+
+    <div class="grid-wrapper">
+      <div class="scores">
+        <div class="current-score">
+          <h2 class="title">CURRENT SCORE</h2>
+          <h2 class="nominal-score">0</h2>
+        </div>
+        <div class="high-score">
+          <h2 class="title">HIGH SCORE</h2>
+          <h2 class="nominal-score">0</h2>
+        </div>
+      </div>
+
+      <div class="grid">
+
+      </div>
+
+      <div class="lives">
+        <div class="lives-remaining"></div>
+        <div class="fruits"></div>
+      </div>
+    </div>
+
+  </section>
+
+
   
 
 
