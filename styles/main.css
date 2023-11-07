@@ -23,8 +23,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
   background-color: var(--menu-bg);
+  height: 100vh;
 }
 
 .pacmanLogo {
@@ -41,13 +41,23 @@ button.start-play {
   background-color: var(--btn-bg);
 }
 
+button.main-menu {
+  width: 10%;
+  height: 45px;
+  cursor:pointer;
+  border: black solid 2px;
+  border-radius: 5px;
+  box-shadow: 2px 2px red;
+  background-color: var(--btn-bg);
+}
+
 .loading-screen {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
   background-color: black;
+  height: 100vh;
 }
 
 .loading-screen h1 {
@@ -59,8 +69,8 @@ button.start-play {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  min-height: 100vh;
   background-color: black;
+  height: 100vh;
 }
 
 .grid-wrapper {
@@ -93,8 +103,8 @@ button.start-play {
 /* Classes */
 /* Regular cell - Empty available grid class*/
 .cell {
-  font-Size: 5px;
-  border-radius: 5px;
+  font-Size: 0px;
+  border-radius: 10%;
   background-position: center;
   background-repeat: no-repeat;
   text-align: center;
@@ -123,7 +133,7 @@ button.start-play {
   background-size: 120%;
 }
 
-/* Blinky - enemy*/
+/* Blinky - enemy */
 .blinky {
   background-image: url(../assets/blinky.gif);
   background-size: 100%;
@@ -155,7 +165,8 @@ button.start-play {
 
 .lives {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: space-between;
   color: white;
   margin-top: 1em;
 }
@@ -169,4 +180,28 @@ button.start-play {
   background-image: url(../assets/pacman.gif);
   background-size: 100%;
   margin: 5px;
+}
+
+.ghost {
+  
+}
+
+.gameover-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: black;
+  color: white;
+  text-align: center;
+  height: 100vh;
+}
+
+.floating-ready {
+  position: fixed;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: red;
+  font-size: 3em;
 }

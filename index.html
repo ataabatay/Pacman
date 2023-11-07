@@ -12,15 +12,15 @@
 </head>
 <body>
 
-  <!-- <section class="start-menu gamestate">
+  <section class="start-menu gamestate">
     <img class="pacmanLogo" src="./assets/Pac-Man.png" alt="pacman-logo">
     <button class="start-play">PLAY</button>
   </section>
 
   <section class="loading-screen gamestate">
-    <h1>LOADING</h1>z
+    <h1>LOADING</h1>
     <img class="loadGif" src="./assets/loadingscreen.gif" alt="">
-  </section> -->
+  </section>
 
   <section class="gameplay-screen gamestate">
 
@@ -37,20 +37,36 @@
       </div>
 
       <div class="grid">
-
+        <div class="floating-ready">READY!</div>
       </div>
 
       <div class="lives">
-        <h2 class="title">LIVES</h2>
-        <div class="lives-remaining">
+        <div class="live-zone">
+          <h2 class="title">LIVES</h2>
+          <div class="lives-remaining">
+          </div>
         </div>
+
         <div class="fruits"></div>
+
+        <div class="remaining-food">
+          <h2 class="title">REMAINING FOOD</h2>
+          <h2 class="nominal-score">0</h2>
+        </div>
       </div>
     </div>
 
   </section>
 
-
+  <section class="gameover-screen gamestate">
+    <img class="pacmanLogo" src="./assets/Pac-Man.png" alt="pacman-logo">
+    <h1>GAME OVER</h1>
+    <div class="final-score">
+      <h2 class="title">FINAL SCORE</h2>
+      <h2 class="nominal-score">0</h2>
+    </div>
+    <button class="main-menu">MAIN MENU</button>
+  </section>
   
 
 
