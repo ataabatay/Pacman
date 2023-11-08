@@ -553,28 +553,22 @@ function movePacman(newPosition, direction) {
   remainingFoodDisplay.innerText = parseFloat(remainingFood)
   cells[newPosition].classList.add('pacman', `${direction}`)
 
-    // If Pacman ends on a location with power pellet
-  // increase score by 50
-  // remove power pellet from the screen
-  // add .vulnerable class to all the ghosts
-    // when ghosts are in vulnerable state:
-      // pacman can eat ghosts as if they're food and gain 200 points
-      // an eaten ghost:
-        // returns to starting point
-        // vulnerable state is removed
-        // restarts the chase
+// If Pacman ends on a location with power pellet
+// increase score by 50
+// remove power pellet from the screen
+// add .vulnerable class to all the ghosts
+// when ghosts are in vulnerable state:
+// pacman can eat ghosts as if they're food and gain 200 points
+// an eaten ghost:
+  // returns to starting point
+  // vulnerable state is removed
+  // restarts the chase
 }
 
 // function to get Pacman invincible mode ---- TO BE DONE
 function powerUpMode() {
   powerUpState = true
   console.log('Power Up Active')
-  // !CHECK IF THIS IS NECESSARY
-  // sprites.forEach(sprite => {
-  //   if (sprite.nature === 'ghost') {
-  //     sprite.vulnerable === true
-  //   }
-  // })
   setTimeout(() => {
     powerUpState = false
     console.log('Power Up Deactivated')
@@ -859,7 +853,6 @@ function restartLevel() {
   ready.classList.remove('hidden')
   
   // - timeout for delayed start (2s), continue game as normal
-  // TO ADD IS THE READY SCREEN AGAIN HERE!!!
   setTimeout(() => {
     gameRunning = true
     ready.classList.add('hidden')
@@ -961,9 +954,11 @@ function randomMovement() {
 }
 
 // Reality checker
-setInterval(() => {
+const realityChecker = setInterval(() => {
   console.log(gameRunning)
+  // const introSound = new Audio('../sounds/intro.wav').play()
 }, 1000)
+
 
 
 localStorage.setItem('highscore',highScore)
