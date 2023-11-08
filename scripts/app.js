@@ -1,19 +1,19 @@
 console.log('working')
-// Elements //
 
+//!--------------------------Elements-------------------------!//
 // All gamestates - these are individual pages and include
 // 0: start-menu screen (optional)
 // 1: loading screen (optional)
 // 2: gameplay-screen (required)
 // 3: gameover-screen (required)
-// 4: pause-screen (optional)
+// 4: win-screen (optional)
 const gameStates = document.querySelectorAll('.gamestate')
 
 // play button - to start gameplay
 const startBtn = document.querySelector('.start-play')
 
 // main menu button - to return to main menu
-const mainMenuBtn = document.querySelector('.main-menu')
+const mainMenuBtn = document.querySelectorAll('.main-menu')
 
 // grid-wrapper width to create the cells
 const gridWrapperWidth = document.querySelector('.grid-wrapper').offsetWidth
@@ -23,18 +23,18 @@ const grid = document.querySelector('.grid')
 
 // current-score - to show current score
 const currentScoreDisplay = document.querySelector('.current-score .nominal-score')
-let currentScore = 0 // the actual current score value
 
 // remaining food - to show remaining food on the grid
 const remainingFoodDisplay = document.querySelector('.remaining-food .nominal-score')
-let remainingFood = null // the actual count of available food on the screen
 
-// final-score - to show final score
-const finalScoreDisplay = document.querySelector('.final-score .nominal-score')
-let finalScore = null // the actual current score value
+// final-score on losing - to show final score
+const lostScoreDisplay = document.querySelector('.lost-score .nominal-score')
+
+// final-score on losing - to show final score
+const wonScoreDisplay = document.querySelector('.won-score .nominal-score')
 
 // high-score - to fetch and show the high score from localstorage
-const highScore = document.querySelector('.high-score .nominal-score')
+const highScoreDisplay = document.querySelectorAll('.high-score .nominal-score')
 
 // available lives area to manipulate how many lives the player has
 const remainingLives = document.querySelector('.lives-remaining')
@@ -42,9 +42,14 @@ const remainingLives = document.querySelector('.lives-remaining')
 // READY! disclaimer to display or not
 const ready = document.querySelector('.floating-ready')
 
-// Variables //
-// cells - every individual cell that's created with the createGrid() function
-let cells = []
+//!--------------------------Variables-------------------------!//
+let currentScore = 0 // the actual current score value
+let remainingFood = null // the actual count of available food on the screen
+let finalScore = null // the actual current score value
+let highScore = 0 // high score value
+let cells = [] // cells - every individual cell that's created with the createGrid() function
+let powerUpDuration = 20 // duration of power up mode when you eat a power pellet
+let powerUpState = false // power up mode checker for logic
 
 // Directions array to use for random ghost movement
 // 0: up
@@ -53,12 +58,10 @@ let cells = []
 // 3: left
 const directions = ['up', 'right', 'down', 'left']
 
-// Interval variable dictating ghost movement speed
-const enemySpeed = 100
+// !CHANGE THIIIIS!
+const enemySpeed = 100 // Interval variable dictating ghost movement speed
 
-// available lives
-let lives = null
-
+let lives = null // available lives
 
 // gameState - this will be the global variable that's deciding which screen is being shown
 // 0: start-menu screen (optional)
@@ -68,17 +71,14 @@ let lives = null
 // 4: pause-screen (optional)
 let gameState = 0 // on page load we start on the start-menu
 
-// gameRunning - boolean to help with other functions checking to see if the game is running or not
-let gameRunning = false
+let gameRunning = false // gameRunning - boolean to help with other functions checking to see if the game is running or not
 
 // standard Pacman maze width and height ratios
 const stdWidth = 28 // this will be the base variable we use to decide how many grid cells to create
 const stdHeight = 31 // this will be the base variable we use to decide how many rows of cells we're going to create
 
-// the width and height of our cells dynamically created based on screen size
-const width = gridWrapperWidth / stdWidth
-// cell count - how many grid cells we need to create
-const cellCount = stdHeight * stdWidth
+const width = gridWrapperWidth / stdWidth // the width and height of our cells dynamically created based on screen size
+const cellCount = stdHeight * stdWidth // cell count - how many grid cells we need to create
 
 // Out of bounds areas in the maze indexed from top left to bottom right
 const oobs = [
@@ -297,30 +297,32 @@ const sprites = [
     nature: 'ghost',
     startPos: 322,
     currentPos: 322,
+    vulnerable: false,
   },
   {
     name: 'pinky',
     nature: 'ghost',
     startPos: 349,
     currentPos: 349,
+    vulnerable: false,
   },
   {
     name: 'inky',
     nature: 'ghost',
     startPos: 404,
     currentPos: 404,
+    vulnerable: false,
   },
   {
     name: 'clyde',
     nature: 'ghost',
     startPos: 407,
     currentPos: 407,
+    vulnerable: false,
   }
 ]
 
-// highScore - high score to be stored inside the localstorage for persistence
-
-// Functions
+//!--------------------------Functions-------------------------!//
 // screen swapper to move from screen to screen
 function swapScreen(gameState) {
   // hide all screens to decide which one to show later
@@ -328,9 +330,6 @@ function swapScreen(gameState) {
   // show the relevant screen
   gameStates[gameState].classList.remove('hidden')
 }
-
-// hide all screens and only show main menu upon page load
-swapScreen(gameState)
 
 // startGame() - function to start the game upon start button 'click'
 function startGame() {
@@ -348,6 +347,7 @@ function startGame() {
     ready.classList.add('hidden')
   }, 5000)
   createGrid()
+  randomMovement()
 }
 
 // createGrid() - function to create a grid where the game will be played
@@ -411,6 +411,7 @@ function createGrid() {
     powerPellets.forEach(pellet => cells[pellet].classList.remove('food'))
     powerPellets.forEach(pellet => cells[pellet].classList.add('powerPellet'))
 
+    // !!CHANGE THIS BACK!! //
     // set the remainingFood so we can track and decide if the game is won or not
     cells.forEach(cell => cell.classList.contains('food') ? remainingFood++ : '')
     cells.forEach(cell => cell.classList.contains('powerPellet') ? remainingFood++ : '')
@@ -425,11 +426,9 @@ function createGrid() {
   function addLives() {
     for (let i = 0; i < lives; i++) {
       const life = document.createElement('div')
-      life.classList.add('life')
-      // life.innerText = i // REMOVE WHEN DONE
-      life.id = i
       life.style.width = `${width}px`
       life.style.height = `${width}px`
+      life.classList.add('life')
       remainingLives.append(life)
     }
   }
@@ -448,8 +447,8 @@ function resetGrid() {
   currentScoreDisplay.innerText = 0
   
   // Reset lives to 0
-  lives = 0
-  
+  remainingLives.innerHTML = ''
+
   // Reset remaining food to 0 and display it
   remainingFood = 0
   remainingFoodDisplay.innerText = remainingFood
@@ -483,20 +482,52 @@ function keyPress(evt) {
   }
 }
 
+function winCheck () {
+  if (remainingFood === 0) {
+    highScoreCheck()
+    clearInterval(interval)
+    // stop running the game
+    gameRunning = false
+    // chaneg the gameState to won
+    gameState = 4
+    // swap to win screen
+    swapScreen(gameState)
+    // set current score to final score
+    finalScore = currentScore
+    // show final score
+    wonScoreDisplay.innerText = finalScore 
+    restartLevel()
+    resetGrid()
+  }
+}
+
 // move() - function to make Pacman move around the screen
 function movePacman(newPosition) {
   // If Pacman ends on a location with a class a ghost
   if (cells[newPosition].classList.contains('ghost')) {
-    // remove a life
-    removeLife()
-    console.log(`Pacman touched a ghost => ${lives} lives remain`)
-    // check how many lives are left if 0 cue the game over function
-    if (lives === 0) {
-      gameOver()
-      return
+    // IF PACMAN TOUCHES A GHOST WHEN PACMAN IS IN POWER UP MODE //
+    // find which ghost is touched
+    let touchedGhost = sprites.findIndex((sprite => cells[newPosition].classList.contains(sprite.name)))
+    console.log(touchedGhost)
+    if (powerUpState === true) {
+      // increase score by 200 (later to be implemented each ghost eaten in succession increases the score by double)
+      currentScore += 200
+      // ghost is removed from location
+      // ghost gets out of vulnerable mode
+      // ghost is returned to starting position
+      removeSpecificGhost(touchedGhost, newPosition)
     } else {
-      restartLevel() // if > 0 cue restart the level function
-      return
+    // remove a life
+      removeLife()
+      console.log(`Pacman touched a ghost => ${lives} lives remain`)
+      // check how many lives are left if 0 cue the game over function
+      if (lives === 0) {
+        gameOver()
+        return
+      } else {
+        restartLevel() // if > 0 cue restart the level function
+        return
+      }
     }
   } else if (cells[newPosition].classList.contains('food')) {
     currentScore += 10
@@ -511,11 +542,12 @@ function movePacman(newPosition) {
     cells[newPosition].classList.remove('powerPellet')
     // TO ADD: vulnerability and bonus mode to chase ghosts add as a function
   }
+  highScoreCheck()
+  winCheck()
   currentScoreDisplay.innerText = parseFloat(currentScore)
   remainingFoodDisplay.innerText = parseFloat(remainingFood)
   cells[newPosition].classList.add('pacman')
 
-  
     // If Pacman ends on a location with power pellet
   // increase score by 50
   // remove power pellet from the screen
@@ -530,7 +562,18 @@ function movePacman(newPosition) {
 
 // function to get Pacman invincible mode ---- TO BE DONE
 function powerUpMode() {
+  powerUpState = true
   console.log('Power Up Active')
+  // !CHECK IF THIS IS NECESSARY
+  // sprites.forEach(sprite => {
+  //   if (sprite.nature === 'ghost') {
+  //     sprite.vulnerable === true
+  //   }
+  // })
+  setTimeout(() => {
+    powerUpState = false
+    console.log('Power Up Deactivated')
+  }, powerUpDuration * 1000)
 }
 
 // remove() - function to remove Pacman from the previous cell
@@ -542,7 +585,7 @@ function removePacman() {
 function blinkyMovement() {
   // REREAD AND REWORK RIGHT NOW ITS JUST BAD
   function removeBlinky() {
-    cells[sprites[1].currentPos].classList.remove('blinky', 'ghost')
+    cells[sprites[1].currentPos].classList.remove('blinky', 'ghost', 'vulnerable')
   }
   removeBlinky()
   
@@ -568,20 +611,36 @@ function blinkyMovement() {
   // REREAD AND REWORK RIGHT NOW ITS JUST BAD
   function moveBlinky(newPosition) {
     if (cells[newPosition].classList.contains('pacman')) {
-      // remove a life
-      removeLife()
-      console.log(`Blinky touched Pacman => ${lives} lives remain`)
-      // check how many lives are left if 0 cue the game over function
-      if (lives === 0) {
-        gameOver()
-        return
+      // !IF BLINKY TOUCHES PACMAN WHEN PACMAN IS IN POWER UP MODE! //
+      if (powerUpState === true) {
+        // ghost is removed from location
+        removeBlinky()
+        // ghost gets out of vulnerable mode 
+        cells[newPosition].classList.remove('vulnerable')
+        // ghost is returned to starting position
+        sprites[1].currentPos = sprites[1].startPos
       } else {
-        restartLevel() // if > 0 cue restart the level function
-        return
+        // remove a life
+        removeLife()
+        console.log(`Blinky touched Pacman => ${lives} lives remain`)
+        // check how many lives are left if 0 cue the game over function
+        if (lives === 0) {
+          gameOver()
+          return
+        } else {
+          restartLevel() // if > 0 cue restart the level function
+          return
+        }
       }
     } else {
-      cells[newPosition].classList.add('blinky')
-      cells[newPosition].classList.add('ghost')
+      if (powerUpState === true) {
+        cells[newPosition].classList.add('blinky')
+        cells[newPosition].classList.add('ghost')
+        cells[newPosition].classList.add('vulnerable')
+      } else {
+        cells[newPosition].classList.add('blinky')
+        cells[newPosition].classList.add('ghost')
+      }
     }
   }
   moveBlinky(sprites[1].currentPos)
@@ -590,8 +649,7 @@ function blinkyMovement() {
 function pinkyMovement() {  
   // REREAD AND REWORK RIGHT NOW ITS JUST BAD
   function removePinky() {
-    cells[sprites[2].currentPos].classList.remove('pinky','ghost')
-
+    cells[sprites[2].currentPos].classList.remove('pinky','ghost','vulnerable')
   }
   removePinky()
   
@@ -618,20 +676,36 @@ function pinkyMovement() {
   // REREAD AND REWORK RIGHT NOW ITS JUST BAD
   function movePinky(newPosition) {
     if (cells[newPosition].classList.contains('pacman')) {
-      // remove a life
-      removeLife()
-      console.log(`Pinky touched Pacman => ${lives} lives remain`)
-      // check how many lives are left if 0 cue the game over function
-      if (lives === 0) {
-        gameOver()
-        return
+      // !IF PINKY TOUCHES PACMAN WHEN PACMAN IS IN POWER UP MODE! //
+      if (powerUpState === true) {
+        // ghost is removed from location
+        removePinky()
+        // ghost gets out of vulnerable mode 
+        cells[newPosition].classList.remove('vulnerable')  
+        // ghost is returned to starting position
+        sprites[2].currentPos = sprites[2].startPos
       } else {
-        restartLevel() // if > 0 cue restart the level function
-        return
+        // remove a life
+        removeLife()
+        console.log(`Pinky touched Pacman => ${lives} lives remain`)
+        // check how many lives are left if 0 cue the game over function
+        if (lives === 0) {
+          gameOver()
+          return
+        } else {
+          restartLevel() // if > 0 cue restart the level function
+          return
+        }
       }
     } else {
-      cells[newPosition].classList.add('pinky')
-      cells[newPosition].classList.add('ghost')
+      if (powerUpState === true) {
+        cells[newPosition].classList.add('pinky')
+        cells[newPosition].classList.add('ghost')
+        cells[newPosition].classList.add('vulnerable')
+      } else {
+        cells[newPosition].classList.add('pinky')
+        cells[newPosition].classList.add('ghost')
+      }
     }
   }
   movePinky(sprites[2].currentPos)
@@ -640,7 +714,7 @@ function pinkyMovement() {
 function inkyMovement() {  
   // REREAD AND REWORK RIGHT NOW ITS JUST BAD
   function removeInky() {
-    cells[sprites[3].currentPos].classList.remove('inky','ghost')
+    cells[sprites[3].currentPos].classList.remove('inky','ghost','vulnerable')
   }
   removeInky()
   
@@ -666,20 +740,36 @@ function inkyMovement() {
   // REREAD AND REWORK RIGHT NOW ITS JUST BAD
   function moveInky(newPosition) {
     if (cells[newPosition].classList.contains('pacman')) {
-      // remove a life
-      removeLife()
-      console.log(`Inky touched Pacman => ${lives} lives remain`)
-      // check how many lives are left if 0 cue the game over function
-      if (lives === 0) {
-        gameOver()
-        return
+      // !IF INKY TOUCHES PACMAN WHEN PACMAN IS IN POWER UP MODE! //
+      if (powerUpState === true) {
+        // ghost is removed from location
+        removeInky()
+        // ghost gets out of vulnerable mode 
+        cells[newPosition].classList.remove('vulnerable')
+        // ghost is returned to starting position
+        sprites[2].currentPos = sprites[2].startPos
       } else {
-        restartLevel() // if > 0 cue restart the level function
-        return
+        // remove a life
+        removeLife()
+        console.log(`Inky touched Pacman => ${lives} lives remain`)
+        // check how many lives are left if 0 cue the game over function
+        if (lives === 0) {
+          gameOver()
+          return
+        } else {
+          restartLevel() // if > 0 cue restart the level function
+          return
+        }
       }
     } else {
-      cells[newPosition].classList.add('inky')
-      cells[newPosition].classList.add('ghost')
+      if (powerUpState === true) {
+        cells[newPosition].classList.add('inky')
+        cells[newPosition].classList.add('ghost')
+        cells[newPosition].classList.add('vulnerable')
+      } else {
+        cells[newPosition].classList.add('inky')
+        cells[newPosition].classList.add('ghost')
+      }
     }
   }
   moveInky(sprites[3].currentPos)
@@ -688,7 +778,7 @@ function inkyMovement() {
 function clydeMovement() {  
   // REREAD AND REWORK RIGHT NOW ITS JUST BAD
   function removeClyde() {
-    cells[sprites[4].currentPos].classList.remove('clyde','ghost')
+    cells[sprites[4].currentPos].classList.remove('clyde','ghost','vulnerable')
   }
   removeClyde()
   
@@ -714,20 +804,36 @@ function clydeMovement() {
   // REREAD AND REWORK RIGHT NOW ITS JUST BAD
   function moveClyde(newPosition) {
     if (cells[newPosition].classList.contains('pacman')) {
-      // remove a life
-      removeLife()
-      console.log(`Clyde touched Pacman => ${lives} lives remain`)
-      // check how many lives are left if 0 cue the game over function
-      if (lives === 0) {
-        gameOver()
-        return
+      // !IF CLYDE TOUCHES PACMAN WHEN PACMAN IS IN POWER UP MODE! //
+      if (powerUpState === true) {
+        // ghost is removed from location
+        removeClyde()
+        // ghost gets out of vulnerable mode 
+        cells[newPosition].classList.remove('vulnerable')
+        // ghost is returned to starting position
+        sprites[4].currentPos = sprites[4].startPos
       } else {
-        restartLevel() // if > 0 cue restart the level function
-        return
+        // remove a life
+        removeLife()
+        console.log(`Clyde touched Pacman => ${lives} lives remain`)
+        // check how many lives are left if 0 cue the game over function
+        if (lives === 0) {
+          gameOver()
+          return
+        } else {
+          restartLevel() // if > 0 cue restart the level function
+          return
+        }
       }
     } else {
-      cells[newPosition].classList.add('clyde')
-      cells[newPosition].classList.add('ghost')
+      if (powerUpState === true) {
+        cells[newPosition].classList.add('clyde')
+        cells[newPosition].classList.add('ghost')
+        cells[newPosition].classList.add('vulnerable')
+      } else {
+        cells[newPosition].classList.add('clyde')
+        cells[newPosition].classList.add('ghost')
+      }
     }
   }
   moveClyde(sprites[4].currentPos)
@@ -757,6 +863,8 @@ function restartLevel() {
 
 // function to handle when the game is over
 function gameOver() {
+  highScoreCheck()
+  clearInterval(interval)
   console.log('Game Over!')
   // set gamerunning to false 
   gameRunning = false
@@ -767,7 +875,7 @@ function gameOver() {
   // set current score to final score
   finalScore = currentScore
   // show final score
-  finalScoreDisplay.innerText = finalScore  
+  lostScoreDisplay.innerText = finalScore  
   restartLevel()
   resetGrid()
 }
@@ -786,6 +894,11 @@ function removeGhosts() {
   cells[sprites[4].currentPos].classList.remove('clyde','ghost')
 }
 
+function removeSpecificGhost(touchedGhost, newPosition) {
+  cells[newPosition].classList.remove(`${sprites[touchedGhost].name}`,'ghost','vulnerable')
+  sprites[touchedGhost].currentPos = sprites[touchedGhost].startPos
+}
+
 function removeLife() {
   // remove one life
   lives--
@@ -799,34 +912,55 @@ function removeLife() {
   }
 }
 
-// if highscore <= currentscore update highscore as well
+// function to check if the current score is higher than highscore and update highscore
+function highScoreCheck() {
+  // the actual high score value stored
+  if (currentScore > parseInt(localStorage.getItem('highscore'))) {
+    // set the new highscore
+    highScore = currentScore
+    // update the visuals for highscore
+    highScoreDisplay.forEach(display => display.innerText = highScore)
+    localStorage.setItem('highscore', highScore)
+  }
+}
 
-// Event Listeners
+//!--------------------------Event Listeners-------------------------!//
 // startbutton.onclick.run startGame eventlistener
 startBtn.addEventListener('click', startGame)
 // mainmenubutton.onclick.return mainmenu eventlistener
-mainMenuBtn.addEventListener('click', function() {
-  swapScreen(0)
+mainMenuBtn.forEach(btn => {
+  btn.addEventListener('click', function() {
+    swapScreen(0)
+  })
 })
 // keystroke listener event that listens for key presses
 document.addEventListener('keydown', keyPress)
 
-//////////////////////////
-//// Active gameplay /////
-//////////////////////////
-setTimeout(() => {
-  // functions to move the ghosts around the grid randomly (pretty bad ai for now)
-  setInterval(function randomMovement() {
-    if (gameRunning === true) {
-      blinkyMovement()
-      pinkyMovement()
-      inkyMovement()
-      clydeMovement()
-    }
-  }, enemySpeed)
-}, 2000)
+//!--------------------------Page Load-------------------------!//
+// hide all screens and only show main menu upon page load
+swapScreen(gameState)
 
-// gameRunning variable check
+// functions to move the ghosts around the grid randomly (pretty bad ai for now)
+let interval
+
+function randomMovement() {
+  setTimeout(() => {
+    interval = setInterval(() => {
+      if (gameRunning === true) {
+        blinkyMovement()
+        pinkyMovement()
+        inkyMovement()
+        clydeMovement()
+      }
+    }, enemySpeed)
+  }, 2000)
+}
+
+// Reality checker
 setInterval(() => {
   console.log(gameRunning)
 }, 1000)
+
+
+localStorage.setItem('highscore',highScore)
+highScoreDisplay.forEach(display => display.innerText = currentScore)

@@ -18,6 +18,7 @@ body {
   margin: 0;
 }
 
+/* !SCREENS */
 .start-menu {
   display: flex;
   flex-direction: column;
@@ -27,6 +28,47 @@ body {
   height: 100vh;
 }
 
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: black;
+  height: 100vh;
+}
+
+.gameplay-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background-color: black;
+  height: 100vh;
+}
+
+.gameover-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: black;
+  color: white;
+  text-align: center;
+  height: 100vh;
+}
+
+.win-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--menu-bg);
+  color: black;
+  text-align: center;
+  height: 100vh;
+}
+
+/* !ASSETS */
 .pacmanLogo {
   width: 50%;
 }
@@ -41,8 +83,8 @@ button.start-play {
   background-color: var(--btn-bg);
 }
 
-button.main-menu {
-  width: 10%;
+button {
+  width: 100px;
   height: 45px;
   cursor:pointer;
   border: black solid 2px;
@@ -51,26 +93,24 @@ button.main-menu {
   background-color: var(--btn-bg);
 }
 
-.loading-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: black;
-  height: 100vh;
+.floating-ready {
+  position: fixed;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: red;
+  font-size: 3em;
 }
 
+.buttons {
+  width: 250px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* !OTHER ELEMENTS */
 .loading-screen h1 {
   color: white;
-}
-
-.gameplay-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  background-color: black;
-  height: 100vh;
 }
 
 .grid-wrapper {
@@ -94,13 +134,38 @@ button.main-menu {
   color: white;
 }
 
-.hidden {
-  display: none;
-  opacity: 0;
-  pointer-events: none;
+.lives {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  color: white;
+  margin-top: 1em;
+  text-align: center;
 }
 
-/* Classes */
+.lives-remaining {
+  height: 20%;
+  display: flex;
+}
+
+.life {
+  background-image: url(../assets/pacman.gif);
+  background-size: 100%;
+  margin: 5px;
+}
+
+.high-score {
+  /* position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translate(-50%, -50%); */
+}
+
+.hidden {
+  display: none;
+  pointer-events: none;
+}
+/* !CLASSES */
 /* Regular cell - Empty available grid class*/
 .cell {
   font-Size: 0px;
@@ -157,51 +222,13 @@ button.main-menu {
   background-size: 100%;
 }
 
-/* Vulnerable state for enemies */
-.vulnerable {
-  background-image: url(../assets/vulnerable.gif);
-  background-size: 100%;
-}
-
-.lives {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  color: white;
-  margin-top: 1em;
-}
-
-.lives-remaining {
-  height: 20%;
-  display: flex;
-}
-
-.life {
-  background-image: url(../assets/pacman.gif);
-  background-size: 100%;
-  margin: 5px;
-}
-
+/* empty ghost class for enemies for ease of handling */
 .ghost {
   
 }
 
-.gameover-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: black;
-  color: white;
-  text-align: center;
-  height: 100vh;
-}
-
-.floating-ready {
-  position: fixed;
-  top: 60%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: red;
-  font-size: 3em;
+/* Vulnerable state for enemies */
+.vulnerable {
+  background-image: url(../assets/vulnerable.gif);
+  background-size: 100%;
 }
