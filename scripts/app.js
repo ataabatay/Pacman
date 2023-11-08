@@ -59,7 +59,7 @@ let powerUpState = false // power up mode checker for logic
 const directions = ['up', 'right', 'down', 'left']
 
 // !CHANGE THIIIIS!
-const enemySpeed = 100 // Interval variable dictating ghost movement speed
+const enemySpeed = 100000000 // Interval variable dictating ghost movement speed
 
 let lives = null // available lives
 

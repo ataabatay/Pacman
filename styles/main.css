@@ -194,8 +194,8 @@ button {
 
 /* Pacman */
 .pacman {
-  background-image: url(../assets/pacman.gif);
-  background-size: 120%;
+  background-image: url(../assets/pacmandown.gif);
+  background-size: 90%;
 }
 
 /* Blinky - enemy */
