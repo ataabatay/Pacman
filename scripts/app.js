@@ -56,10 +56,10 @@ let powerUpState = false // power up mode checker for logic
 // 1: right
 // 2: down
 // 3: left
-const directions = ['up', 'right', 'down', 'left']
+const directions = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft']
 
 // !CHANGE THIIIIS!
-const enemySpeed = 100000000 // Interval variable dictating ghost movement speed
+const enemySpeed = 100 // Interval variable dictating ghost movement speed
 
 let lives = null // available lives
 
@@ -289,12 +289,14 @@ const sprites = [
   {
     name: 'pacman',
     nature: 'player',
+    startingLook: 'ArrowLeft',
     startPos: 657,
     currentPos: 657,
   },
   {
     name: 'blinky',
     nature: 'ghost',
+    startingLook: 'ArrowUp',
     startPos: 322,
     currentPos: 322,
     vulnerable: false,
@@ -302,6 +304,7 @@ const sprites = [
   {
     name: 'pinky',
     nature: 'ghost',
+    startingLook: 'ArrowRight',
     startPos: 349,
     currentPos: 349,
     vulnerable: false,
@@ -309,6 +312,7 @@ const sprites = [
   {
     name: 'inky',
     nature: 'ghost',
+    startingLook: 'ArrowDown',
     startPos: 404,
     currentPos: 404,
     vulnerable: false,
@@ -316,6 +320,7 @@ const sprites = [
   {
     name: 'clyde',
     nature: 'ghost',
+    startingLook: 'ArrowLeft',
     startPos: 407,
     currentPos: 407,
     vulnerable: false,
@@ -459,7 +464,7 @@ function resetGrid() {
 function keyPress(evt) {
   if (gameRunning === true) {
     // remove pacman from current location
-    removePacman()
+    removePacman(evt.code)
     // listen to which key is pressed and check to ensure the cell to move does not have oob class
     // using zero index which I know is bad but will fix if I have time, just looks ugly and tough to read in long version
     // handles when Pacman is at the right warp on the map
@@ -478,7 +483,7 @@ function keyPress(evt) {
       sprites[0].currentPos--
     }
     // move pacman based on the new current position
-    movePacman(sprites[0].currentPos)
+    movePacman(sprites[0].currentPos, evt.code)
   }
 }
 
@@ -502,7 +507,7 @@ function winCheck () {
 }
 
 // move() - function to make Pacman move around the screen
-function movePacman(newPosition) {
+function movePacman(newPosition, direction) {
   // If Pacman ends on a location with a class a ghost
   if (cells[newPosition].classList.contains('ghost')) {
     // IF PACMAN TOUCHES A GHOST WHEN PACMAN IS IN POWER UP MODE //
@@ -546,7 +551,7 @@ function movePacman(newPosition) {
   winCheck()
   currentScoreDisplay.innerText = parseFloat(currentScore)
   remainingFoodDisplay.innerText = parseFloat(remainingFood)
-  cells[newPosition].classList.add('pacman')
+  cells[newPosition].classList.add('pacman', `${direction}`)
 
     // If Pacman ends on a location with power pellet
   // increase score by 50
@@ -577,8 +582,8 @@ function powerUpMode() {
 }
 
 // remove() - function to remove Pacman from the previous cell
-function removePacman() {
-  cells[sprites[0].currentPos].classList.remove('pacman','player')
+function removePacman(prevDir) {
+  cells[sprites[0].currentPos].classList.remove('pacman','player',`${prevDir}`)
 }
 
 // Ghosts AI to be REREAD AND REWORK RIGHT NOW ITS JUST BAD
@@ -594,17 +599,17 @@ function blinkyMovement() {
   
   // adjusting the current position based on the random direction chosen for ghost to move to
   activeDirection = directions[Math.floor(Math.random() * directions.length)]
-  if (activeDirection === 'right' && sprites[1].currentPos === 419) {
+  if (activeDirection === 'ArrowRight' && sprites[1].currentPos === 419) {
     sprites[1].currentPos = 392
-  } else if (activeDirection === 'left' && sprites[1].currentPos === 392) {
+  } else if (activeDirection === 'ArrowLeft' && sprites[1].currentPos === 392) {
     sprites[1].currentPos = 419
-  } else if (activeDirection === 'up' && !cells[sprites[1].currentPos - stdWidth].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowUp' && !cells[sprites[1].currentPos - stdWidth].classList.contains('oob')) {
     sprites[1].currentPos -= stdWidth
-  } else if (activeDirection === 'right' && !cells[sprites[1].currentPos + 1].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowRight' && !cells[sprites[1].currentPos + 1].classList.contains('oob')) {
     sprites[1].currentPos++
-  } else if (activeDirection === 'down' && !cells[sprites[1].currentPos + stdWidth].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowDown' && !cells[sprites[1].currentPos + stdWidth].classList.contains('oob')) {
     sprites[1].currentPos += stdWidth
-  } else if (activeDirection === 'left' && !cells[sprites[1].currentPos - 1].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowLeft' && !cells[sprites[1].currentPos - 1].classList.contains('oob')) {
     sprites[1].currentPos--
   }
 
@@ -658,17 +663,17 @@ function pinkyMovement() {
 
   // adjusting the current position based on the random direction chosen for ghost to move to
   activeDirection = directions[Math.floor(Math.random() * directions.length)]
-  if (activeDirection === 'right' && sprites[2].currentPos === 419) {
+  if (activeDirection === 'ArrowRight' && sprites[2].currentPos === 419) {
     sprites[2].currentPos = 392
-  } else if (activeDirection === 'left' && sprites[2].currentPos === 392) {
+  } else if (activeDirection === 'ArrowLeft' && sprites[2].currentPos === 392) {
     sprites[2].currentPos = 419
-  } else if (activeDirection === 'up' && !cells[sprites[2].currentPos - stdWidth].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowUp' && !cells[sprites[2].currentPos - stdWidth].classList.contains('oob')) {
     sprites[2].currentPos -= stdWidth
-  } else if (activeDirection === 'right' && !cells[sprites[2].currentPos + 1].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowRight' && !cells[sprites[2].currentPos + 1].classList.contains('oob')) {
     sprites[2].currentPos++
-  } else if (activeDirection === 'down' && !cells[sprites[2].currentPos + stdWidth].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowDown' && !cells[sprites[2].currentPos + stdWidth].classList.contains('oob')) {
     sprites[2].currentPos += stdWidth
-  } else if (activeDirection === 'left' && !cells[sprites[2].currentPos - 1].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowLeft' && !cells[sprites[2].currentPos - 1].classList.contains('oob')) {
     sprites[2].currentPos--
   }
 
@@ -723,17 +728,17 @@ function inkyMovement() {
 
   // adjusting the current position based on the random direction chosen for ghost to move to
   activeDirection = directions[Math.floor(Math.random() * directions.length)]
-  if (activeDirection === 'right' && sprites[3].currentPos === 419) {
+  if (activeDirection === 'ArrowRight' && sprites[3].currentPos === 419) {
     sprites[3].currentPos = 392
-  } else if (activeDirection === 'left' && sprites[3].currentPos === 392) {
+  } else if (activeDirection === 'ArrowLeft' && sprites[3].currentPos === 392) {
     sprites[3].currentPos = 419
-  } else if (activeDirection === 'up' && !cells[sprites[3].currentPos - stdWidth].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowUp' && !cells[sprites[3].currentPos - stdWidth].classList.contains('oob')) {
     sprites[3].currentPos -= stdWidth
-  } else if (activeDirection === 'right' && !cells[sprites[3].currentPos + 1].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowRight' && !cells[sprites[3].currentPos + 1].classList.contains('oob')) {
     sprites[3].currentPos++
-  } else if (activeDirection === 'down' && !cells[sprites[3].currentPos + stdWidth].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowDown' && !cells[sprites[3].currentPos + stdWidth].classList.contains('oob')) {
     sprites[3].currentPos += stdWidth
-  } else if (activeDirection === 'left' && !cells[sprites[3].currentPos - 1].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowLeft' && !cells[sprites[3].currentPos - 1].classList.contains('oob')) {
     sprites[3].currentPos--
   }
 
@@ -787,17 +792,17 @@ function clydeMovement() {
 
   // adjusting the current position based on the random direction chosen for ghost to move to
   activeDirection = directions[Math.floor(Math.random() * directions.length)]
-  if (activeDirection === 'right' && sprites[4].currentPos === 419) {
+  if (activeDirection === 'ArrowRight' && sprites[4].currentPos === 419) {
     sprites[4].currentPos = 392
-  } else if (activeDirection === 'left' && sprites[4].currentPos === 392) {
+  } else if (activeDirection === 'ArrowLeft' && sprites[4].currentPos === 392) {
     sprites[4].currentPos = 419
-  } else if (activeDirection === 'up' && !cells[sprites[4].currentPos - stdWidth].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowUp' && !cells[sprites[4].currentPos - stdWidth].classList.contains('oob')) {
     sprites[4].currentPos -= stdWidth
-  } else if (activeDirection === 'right' && !cells[sprites[4].currentPos + 1].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowRight' && !cells[sprites[4].currentPos + 1].classList.contains('oob')) {
     sprites[4].currentPos++
-  } else if (activeDirection === 'down' && !cells[sprites[4].currentPos + stdWidth].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowDown' && !cells[sprites[4].currentPos + stdWidth].classList.contains('oob')) {
     sprites[4].currentPos += stdWidth
-  } else if (activeDirection === 'left' && !cells[sprites[4].currentPos - 1].classList.contains('oob')) {
+  } else if (activeDirection === 'ArrowLeft' && !cells[sprites[4].currentPos - 1].classList.contains('oob')) {
     sprites[4].currentPos--
   }
 
@@ -882,8 +887,7 @@ function gameOver() {
 
 // function to create Pacman and all Ghosts and place them at their starting position
 function addSprites() {
-  sprites.forEach(sprite => cells[sprite.startPos].classList.add(`${sprite.name}`))
-  sprites.forEach(sprite => cells[sprite.startPos].classList.add(`${sprite.nature}`))
+  sprites.forEach(sprite => cells[sprite.startPos].classList.add(`${sprite.name}`,`${sprite.nature}`,`${sprite.startingLook}`))
 }
 
 // Removes all the ghosts from the screen pretty hardcoded will check later
