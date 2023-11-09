@@ -27,7 +27,6 @@ let remainingFood = null // the actual count of available food on the screen
 let finalScore = null // the actual current score value
 let highScore = 0 // high score value
 let cells = [] // cells - every individual cell that's created with the createGrid() function
-const powerUpDuration = 10 // duration of power up mode when you eat a power pellet
 let powerUpState = false // power up mode checker for logic
 let lives = null // available lives at pageload
 let gameState = 0 // on page load we start on the start-menu game state 0
@@ -44,6 +43,7 @@ const stdWidth = 28 // standard Pacman maze width and height ratios
 const stdHeight = 31 /// standard Pacman maze width and height ratios
 const width = gridWrapperWidth / stdWidth // the width and height of our cells dynamically created based on screen size
 const cellCount = stdHeight * stdWidth // cell count - how many grid cells we need to create
+const powerUpDuration = 10 // duration of power up mode when you eat a power pellet
 
 // Out of bounds areas in the maze indexed from top left to bottom right (would've done with canvas if allowed :))
 const oobs = [
@@ -135,12 +135,12 @@ const oobs = [
   {
     start: 346,
     width: 1,
-    height: 5,
+    height: 3,
   },
   {
     start: 353,
     width: 1,
-    height: 5,
+    height: 3,
   },
   {
     start: 420,
@@ -254,14 +254,14 @@ const sprites = [
   {
     name: 'pacman',
     nature: 'player',
-    startingLook: 'ArrowLeft',
+    direction: 'ArrowLeft',
     startPos: 657,
     currentPos: 657,
   },
   {
     name: 'blinky',
     nature: 'ghost',
-    startingLook: 'ArrowUp',
+    direction: 'ArrowUp',
     startPos: 322,
     currentPos: 322,
     vulnerable: false,
@@ -269,7 +269,7 @@ const sprites = [
   {
     name: 'pinky',
     nature: 'ghost',
-    startingLook: 'ArrowRight',
+    direction: 'ArrowRight',
     startPos: 349,
     currentPos: 349,
     vulnerable: false,
@@ -277,7 +277,7 @@ const sprites = [
   {
     name: 'inky',
     nature: 'ghost',
-    startingLook: 'ArrowDown',
+    direction: 'ArrowDown',
     startPos: 404,
     currentPos: 404,
     vulnerable: false,
@@ -285,7 +285,7 @@ const sprites = [
   {
     name: 'clyde',
     nature: 'ghost',
-    startingLook: 'ArrowLeft',
+    direction: 'ArrowLeft',
     startPos: 407,
     currentPos: 407,
     vulnerable: false,
@@ -295,7 +295,7 @@ const sprites = [
 // All audio files
 const audios = [
   { 0: '../sounds/intro.wav' },
-  { 1: '../sounds/waitingx.wav' }, // not used was a bit too much
+  { 1: '../sounds/waiting.wav' },
   { 2: '../sounds/gameplaysiren.wav' },
   { 3: '../sounds/eat.wav' },
   { 4: '../sounds/eatghost.wav' },
@@ -309,7 +309,6 @@ const audios = [
 ]
 
 //!--------------------------Functions-------------------------!//
-
 function swapScreen(gameState) { // screen swapper to move from screen to screen
   // hide all screens
   gameStates.forEach(state => state.classList.add('hidden'))
@@ -333,7 +332,6 @@ function startGame() { // startGame() - function to start the game upon start bu
   createGrid() // function to create grid where the game will be played 
   randomMovement() // start making the ghosts move randomly on the map
 }
-
 
 function createGrid() { //creates a grid where the game will be played
   function generateBounds() { // creates a grid of cells
@@ -454,6 +452,7 @@ function movePacman(newPosition, direction) { // make Pacman move around the scr
     currentScore += 10 // increase score
     remainingFood-- // decrease remaining food
     cells[newPosition].classList.remove('food') // remove food from screen
+    
     playSound(audios[8][8]) // play food eating sound
   } else if (cells[newPosition].classList.contains('powerPellet')) { // check power pellet collision
     currentScore += 50 // increase score
@@ -499,363 +498,124 @@ function removePacman(prevDir) { // removes Pacman from previous cell
 }
 
 function removeGhosts() { // Removes all the ghosts from the screen pretty hardcoded will check later
-  cells[sprites[1].currentPos].classList.remove('blinky','ghost')
-  cells[sprites[2].currentPos].classList.remove('pinky','ghost')
-  cells[sprites[3].currentPos].classList.remove('inky','ghost')
-  cells[sprites[4].currentPos].classList.remove('clyde','ghost')
+  for (let i = 1; i < sprites.length; i++) {
+    cells[sprites[i].currentPos].classList.remove(`${sprites[i].name}`,'ghost')
+  }
 }
 
-// // !
-// function ghostMovement(ghostNumber) {
-//   function removeGhost() { // removes ghost from previous cell
-//     cells[sprites[ghostNumber].currentPos].classList.remove(`${sprites[ghostNumber].name}`,'ghost','vulnerable')
-//   }
-//   removeGhost() 
-
-
-// }
-
-
-// Ghosts AI to be REREAD AND REWORK RIGHT NOW ITS JUST BAD
-function blinkyMovement() {
-  // REREAD AND REWORK RIGHT NOW ITS JUST BAD
-  function removeBlinky() {
-    cells[sprites[1].currentPos].classList.remove('blinky', 'ghost', 'vulnerable')
+function ghostMovement(ghostNumber) { // Ghost movement logic
+  function removeGhost(ghostNumber) { // removes ghost from previous cell
+    cells[sprites[ghostNumber].currentPos].classList.remove(`${sprites[ghostNumber].name}`,'ghost','vulnerable')
   }
-  removeBlinky()
-  
-  // choose a random direction
-  let activeDirection = null
-  
-  // adjusting the current position based on the random direction chosen for ghost to move to
-  activeDirection = directions[Math.floor(Math.random() * directions.length)]
-  if (activeDirection === 'ArrowRight' && sprites[1].currentPos === 419) {
-    sprites[1].currentPos = 392
-  } else if (activeDirection === 'ArrowLeft' && sprites[1].currentPos === 392) {
-    sprites[1].currentPos = 419
-  } else if (activeDirection === 'ArrowUp' && !cells[sprites[1].currentPos - stdWidth].classList.contains('oob')) {
-    sprites[1].currentPos -= stdWidth
-  } else if (activeDirection === 'ArrowRight' && !cells[sprites[1].currentPos + 1].classList.contains('oob')) {
-    sprites[1].currentPos++
-  } else if (activeDirection === 'ArrowDown' && !cells[sprites[1].currentPos + stdWidth].classList.contains('oob')) {
-    sprites[1].currentPos += stdWidth
-  } else if (activeDirection === 'ArrowLeft' && !cells[sprites[1].currentPos - 1].classList.contains('oob')) {
-    sprites[1].currentPos--
-  }
+  removeGhost(ghostNumber)
 
-  // REREAD AND REWORK RIGHT NOW ITS JUST BAD
-  function moveBlinky(newPosition) {
-    if (cells[newPosition].classList.contains('pacman')) {
-      // !IF BLINKY TOUCHES PACMAN WHEN PACMAN IS IN POWER UP MODE! //
-      if (powerUpState === true) {
-        // ghost is removed from location
-        removeBlinky()
-        // ghost gets out of vulnerable mode 
-        cells[newPosition].classList.remove('vulnerable')
-        // ghost is returned to starting position
-        sprites[1].currentPos = sprites[1].startPos
-      } else {
-        // remove a life
-        removeLife()
-        console.log(`Blinky touched Pacman => ${lives} lives remain`)
-        // check how many lives are left if 0 cue the game over function
-        if (lives === 0) {
-          gameOver()
-          return
-        } else {
-          restartLevel() // if > 0 cue restart the level function
-          return
-        }
-      }
+  function moveGhost(ghostNumber, nextPosition) { // move the ghost to the next cell
+    if (cells[nextPosition].classList.contains('pacman')) { // check to see if pacman is in next cell
+      if (powerUpState === true) { // check if pacman is in powerup state
+        removeGhost(ghostNumber) // ghost eaten by pacman - remove from location
+        sprites[ghostNumber].currentPos = sprites[ghostNumber].startPos // return ghost to starting location
+      } else { // if pacman not in powerup mode
+        removeLife() // remove life 
+        lives === 0 ? gameOver() : restartLevel() // check how many lives remain and act on it
+        return
+      } 
     } else {
-      if (powerUpState === true) {
-        cells[newPosition].classList.add('blinky')
-        cells[newPosition].classList.add('ghost')
-        cells[newPosition].classList.add('vulnerable')
+      if (powerUpState) {
+        cells[nextPosition].classList.add(`${sprites[ghostNumber].name}`)
+        cells[nextPosition].classList.add('ghost')
+        cells[nextPosition].classList.add('vulnerable')
       } else {
-        cells[newPosition].classList.add('blinky')
-        cells[newPosition].classList.add('ghost')
+        cells[nextPosition].classList.add(`${sprites[ghostNumber].name}`)
+        cells[nextPosition].classList.add('ghost')
       }
     }
   }
-  moveBlinky(sprites[1].currentPos)
-}
 
-function pinkyMovement() {  
-  // REREAD AND REWORK RIGHT NOW ITS JUST BAD
-  function removePinky() {
-    cells[sprites[2].currentPos].classList.remove('pinky','ghost','vulnerable')
-  }
-  removePinky()
-  
-  // choose a random direction
-  let activeDirection = null
-
-  // adjusting the current position based on the random direction chosen for ghost to move to
-  activeDirection = directions[Math.floor(Math.random() * directions.length)]
-  if (activeDirection === 'ArrowRight' && sprites[2].currentPos === 419) {
-    sprites[2].currentPos = 392
-  } else if (activeDirection === 'ArrowLeft' && sprites[2].currentPos === 392) {
-    sprites[2].currentPos = 419
-  } else if (activeDirection === 'ArrowUp' && !cells[sprites[2].currentPos - stdWidth].classList.contains('oob')) {
-    sprites[2].currentPos -= stdWidth
-  } else if (activeDirection === 'ArrowRight' && !cells[sprites[2].currentPos + 1].classList.contains('oob')) {
-    sprites[2].currentPos++
-  } else if (activeDirection === 'ArrowDown' && !cells[sprites[2].currentPos + stdWidth].classList.contains('oob')) {
-    sprites[2].currentPos += stdWidth
-  } else if (activeDirection === 'ArrowLeft' && !cells[sprites[2].currentPos - 1].classList.contains('oob')) {
-    sprites[2].currentPos--
-  }
-
-
-  // REREAD AND REWORK RIGHT NOW ITS JUST BAD
-  function movePinky(newPosition) {
-    if (cells[newPosition].classList.contains('pacman')) {
-      // !IF PINKY TOUCHES PACMAN WHEN PACMAN IS IN POWER UP MODE! //
-      if (powerUpState === true) {
-        // ghost is removed from location
-        removePinky()
-        // ghost gets out of vulnerable mode 
-        cells[newPosition].classList.remove('vulnerable')  
-        // ghost is returned to starting position
-        sprites[2].currentPos = sprites[2].startPos
-      } else {
-        // remove a life
-        removeLife()
-        console.log(`Pinky touched Pacman => ${lives} lives remain`)
-        // check how many lives are left if 0 cue the game over function
-        if (lives === 0) {
-          gameOver()
-          return
-        } else {
-          restartLevel() // if > 0 cue restart the level function
-          return
-        }
-      }
+  let activeDirection = directions[Math.floor(Math.random() * directions.length)] // set an initial random starting direction to go
+  let sanityCheck = 0 // sanity check for while loop to be able to exit
+  function isNextCellAvailable() { // check if the next cell following that direction is available and adjust current position
+    if (activeDirection === 'ArrowRight' && sprites[ghostNumber].currentPos === 419) { // check if warping left
+      sprites[ghostNumber].currentPos = 392      
+      return true
+    } else if (activeDirection === 'ArrowLeft' && sprites[ghostNumber].currentPos === 392) { // check if warping right
+      sprites[ghostNumber].currentPos = 419
+      return true
+    } else if (activeDirection === 'ArrowUp' && !cells[sprites[ghostNumber].currentPos - stdWidth].classList.contains('oob')) { // check cell north
+      sprites[ghostNumber].currentPos -= stdWidth
+      return true
+    } else if (activeDirection === 'ArrowRight' && !cells[sprites[ghostNumber].currentPos + 1].classList.contains('oob')) { // check cell east
+      sprites[ghostNumber].currentPos++
+      return true
+    } else if (activeDirection === 'ArrowDown' && !cells[sprites[ghostNumber].currentPos + stdWidth].classList.contains('oob')) { // check cell south
+      sprites[ghostNumber].currentPos += stdWidth
+      return true
+    } else if (activeDirection === 'ArrowLeft' && !cells[sprites[ghostNumber].currentPos - 1].classList.contains('oob')) { // check cell west
+      sprites[ghostNumber].currentPos--
+      return true
     } else {
-      if (powerUpState === true) {
-        cells[newPosition].classList.add('pinky')
-        cells[newPosition].classList.add('ghost')
-        cells[newPosition].classList.add('vulnerable')
-      } else {
-        cells[newPosition].classList.add('pinky')
-        cells[newPosition].classList.add('ghost')
-      }
+      return false
     }
   }
-  movePinky(sprites[2].currentPos)
-}
-
-function inkyMovement() {  
-  // REREAD AND REWORK RIGHT NOW ITS JUST BAD
-  function removeInky() {
-    cells[sprites[3].currentPos].classList.remove('inky','ghost','vulnerable')
-  }
-  removeInky()
-  
-  // choose a random direction
-  let activeDirection = null
-
-  // adjusting the current position based on the random direction chosen for ghost to move to
-  activeDirection = directions[Math.floor(Math.random() * directions.length)]
-  if (activeDirection === 'ArrowRight' && sprites[3].currentPos === 419) {
-    sprites[3].currentPos = 392
-  } else if (activeDirection === 'ArrowLeft' && sprites[3].currentPos === 392) {
-    sprites[3].currentPos = 419
-  } else if (activeDirection === 'ArrowUp' && !cells[sprites[3].currentPos - stdWidth].classList.contains('oob')) {
-    sprites[3].currentPos -= stdWidth
-  } else if (activeDirection === 'ArrowRight' && !cells[sprites[3].currentPos + 1].classList.contains('oob')) {
-    sprites[3].currentPos++
-  } else if (activeDirection === 'ArrowDown' && !cells[sprites[3].currentPos + stdWidth].classList.contains('oob')) {
-    sprites[3].currentPos += stdWidth
-  } else if (activeDirection === 'ArrowLeft' && !cells[sprites[3].currentPos - 1].classList.contains('oob')) {
-    sprites[3].currentPos--
-  }
-
-  // REREAD AND REWORK RIGHT NOW ITS JUST BAD
-  function moveInky(newPosition) {
-    if (cells[newPosition].classList.contains('pacman')) {
-      // !IF INKY TOUCHES PACMAN WHEN PACMAN IS IN POWER UP MODE! //
-      if (powerUpState === true) {
-        // ghost is removed from location
-        removeInky()
-        // ghost gets out of vulnerable mode 
-        cells[newPosition].classList.remove('vulnerable')
-        // ghost is returned to starting position
-        sprites[2].currentPos = sprites[2].startPos
-      } else {
-        // remove a life
-        removeLife()
-        console.log(`Inky touched Pacman => ${lives} lives remain`)
-        // check how many lives are left if 0 cue the game over function
-        if (lives === 0) {
-          gameOver()
-          return
-        } else {
-          restartLevel() // if > 0 cue restart the level function
-          return
-        }
-      }
+  do { // move the ghost if it can
+    if (isNextCellAvailable()) { // set the new position if next cell is available
+      moveGhost(ghostNumber, sprites[ghostNumber].currentPos) // move the ghost
+      sanityCheck = 1 // get us out of the loop
     } else {
-      if (powerUpState === true) {
-        cells[newPosition].classList.add('inky')
-        cells[newPosition].classList.add('ghost')
-        cells[newPosition].classList.add('vulnerable')
-      } else {
-        cells[newPosition].classList.add('inky')
-        cells[newPosition].classList.add('ghost')
-      }
+      activeDirection = directions[Math.floor(Math.random() * directions.length)] // set a new direction to go
     }
-  }
-  moveInky(sprites[3].currentPos)
+  } while (sanityCheck === 0)
 }
 
-function clydeMovement() {  
-  // REREAD AND REWORK RIGHT NOW ITS JUST BAD
-  function removeClyde() {
-    cells[sprites[4].currentPos].classList.remove('clyde','ghost','vulnerable')
-  }
-  removeClyde()
-  
-  // choose a random direction
-  let activeDirection = null
-
-  // adjusting the current position based on the random direction chosen for ghost to move to
-  activeDirection = directions[Math.floor(Math.random() * directions.length)]
-  if (activeDirection === 'ArrowRight' && sprites[4].currentPos === 419) {
-    sprites[4].currentPos = 392
-  } else if (activeDirection === 'ArrowLeft' && sprites[4].currentPos === 392) {
-    sprites[4].currentPos = 419
-  } else if (activeDirection === 'ArrowUp' && !cells[sprites[4].currentPos - stdWidth].classList.contains('oob')) {
-    sprites[4].currentPos -= stdWidth
-  } else if (activeDirection === 'ArrowRight' && !cells[sprites[4].currentPos + 1].classList.contains('oob')) {
-    sprites[4].currentPos++
-  } else if (activeDirection === 'ArrowDown' && !cells[sprites[4].currentPos + stdWidth].classList.contains('oob')) {
-    sprites[4].currentPos += stdWidth
-  } else if (activeDirection === 'ArrowLeft' && !cells[sprites[4].currentPos - 1].classList.contains('oob')) {
-    sprites[4].currentPos--
-  }
-
-  // REREAD AND REWORK RIGHT NOW ITS JUST BAD
-  function moveClyde(newPosition) {
-    if (cells[newPosition].classList.contains('pacman')) {
-      // !IF CLYDE TOUCHES PACMAN WHEN PACMAN IS IN POWER UP MODE! //
-      if (powerUpState === true) {
-        // ghost is removed from location
-        removeClyde()
-        // ghost gets out of vulnerable mode 
-        cells[newPosition].classList.remove('vulnerable')
-        // ghost is returned to starting position
-        sprites[4].currentPos = sprites[4].startPos
-      } else {
-        // remove a life
-        removeLife()
-        console.log(`Clyde touched Pacman => ${lives} lives remain`)
-        // check how many lives are left if 0 cue the game over function
-        if (lives === 0) {
-          gameOver()
-          return
-        } else {
-          restartLevel() // if > 0 cue restart the level function
-          return
-        }
-      }
-    } else {
-      if (powerUpState === true) {
-        cells[newPosition].classList.add('clyde')
-        cells[newPosition].classList.add('ghost')
-        cells[newPosition].classList.add('vulnerable')
-      } else {
-        cells[newPosition].classList.add('clyde')
-        cells[newPosition].classList.add('ghost')
-      }
-    }
-  }
-  moveClyde(sprites[4].currentPos)
-}
-
-// function to restart level if there are sufficient remaining lives
-function restartLevel() {
-  clearInterval(musicInterval)
-  // play death sound
-  const deathSound = new Audio(audios[5][5])
-  deathSound.volume = 0.05
-  deathSound.play()
-  // set the game to not run until it's run again
-  gameRunning = false
-  // pacman returns to initial position
-  // ghosts return to initial position
-  removeGhosts()
-  removePacman()
-  // reset current position of all sprites to starting position
-  sprites.forEach(sprite => sprite.currentPos = sprite.startPos)
-  addSprites()
-  ready.classList.remove('hidden')
-  
-  // - timeout for delayed start (2s), continue game as normal
-  setTimeout(() => {
-    gameRunning = true
-    ready.classList.add('hidden')
-    playMusic(gameState, 0)
+function restartLevel() { // restart level if sufficient remaining lives
+  clearInterval(musicInterval) // stop the active gameplay screen music
+  playSound(audios[5][5]) // play death sound
+  gameRunning = false // game stopped
+  removeGhosts() // removes ghosts from their current cells
+  removePacman() // removes pacman from their current cells
+  sprites.forEach(sprite => sprite.currentPos = sprite.startPos) // reset current position of all sprites to starting position
+  addSprites() // place Pacman and all Ghosts at their starting position
+  ready.classList.remove('hidden') // show READY! disclaimer
+  setTimeout(() => { // timeout for delayed game continuation
+    gameRunning = true // game continued
+    ready.classList.add('hidden') // READY! disclaimer removed
+    playMusic(gameState, 0) // continue playing music
   }, 3000)
 }
 
-// function to handle when the game is over
-function gameOver() {
-  console.log(activeTune)
-  clearInterval(musicInterval)
-  highScoreCheck()
-  clearInterval(interval)
-  console.log('Game Over!')
-  // set gamerunning to false 
-  gameRunning = false
-  // change screen to gameover screen
-  gameState = 3
-  // swap to gameover screen
-  swapScreen(gameState)
-  // play death sound
-  const gameOverSound = new Audio(audios[5][5])
-  gameOverSound.volume = 0.2
-  gameOverSound.play()
-  // set current score to final score
-  finalScore = currentScore
-  // show final score
-  activeTune = null
-  lostScoreDisplay.innerText = finalScore  
-    // pacman returns to initial position
-  // ghosts return to initial position
-  removeGhosts()
-  removePacman()
-  // reset current position of all sprites to starting position
-  sprites.forEach(sprite => sprite.currentPos = sprite.startPos)
-  resetGrid()
-  clearInterval(realityChecker)
+function gameOver() { // end game
+  gameRunning = false // stop game
+  clearInterval(musicInterval) // stop active music
+  highScoreCheck() // check if score > highscore and handle
+  clearInterval(Ghostinterval) // stop ghosts from moving
+  gameState = 3 // gamestate game over
+  swapScreen(gameState) // swap to gameover screen
+  playSound(audios[5][5]) // play death sound
+  finalScore = currentScore // set current score to final score
+  lostScoreDisplay.innerText = finalScore // show final score
+  removeGhosts() // remove ghosts from screen
+  removePacman(sprites[0].direction) // remove pacman from screen
+  sprites.forEach(sprite => sprite.currentPos = sprite.startPos) // reset current position of all sprites to starting position
+  resetGrid() // reset the grid
 }
 
-// function to create Pacman and all Ghosts and place them at their starting position
-function addSprites() {
-  sprites.forEach(sprite => cells[sprite.startPos].classList.add(`${sprite.name}`,`${sprite.nature}`,`${sprite.startingLook}`))
+function addSprites() { // function to place Pacman and all Ghosts at their starting position
+  sprites.forEach(sprite => cells[sprite.startPos].classList.add(`${sprite.name}`,`${sprite.nature}`,`${sprite.direction}`))
 }
 
-function removeSpecificGhost(touchedGhost, newPosition) {
+function removeSpecificGhost(touchedGhost, newPosition) { // remove a specific ghost when eaten in vulnerable mode
   cells[newPosition].classList.remove(`${sprites[touchedGhost].name}`,'ghost','vulnerable')
   sprites[touchedGhost].currentPos = sprites[touchedGhost].startPos
 }
 
-function removeLife() {
-  // remove one life
-  lives--
-
-  if (lives !== 0) {
-    // fetch individual available lives created in the createGrid function  
-    const lifeIcons = document.querySelectorAll('.life')
-    // no need to check if we have more than 0 lives as if that was the case this function wouldn't have been run
-    // remove one of the life divs simulating loss of 1 life
-    remainingLives.removeChild(lifeIcons[0])
+function removeLife() { // handle removeing a life
+  lives-- // remove one life
+  if (lives !== 0) { // if no lives remain
+    const lifeIcons = document.querySelectorAll('.life') // fetch all displayed life divs
+    remainingLives.removeChild(lifeIcons[0]) // remove one life div simulating loss of 1 life
   }
 }
 
-function highScoreCheck() { //check if current score > highscore, update highscore
+function highScoreCheck() { // check if current score > highscore, update highscore
   if (currentScore > parseInt(localStorage.getItem('highscore'))) {
     highScore = currentScore // set the new highscore
     highScoreDisplay.forEach(display => display.innerText = highScore) // update highscore display
@@ -863,26 +623,23 @@ function highScoreCheck() { //check if current score > highscore, update highsco
   }
 }
 
-function toggleMusic () {
-  if (musicState === true) {
+function toggleMusic () { // mutes/unmutes active music (does not apply to sfx)
+  if (musicState === true) { // if music is playing mute it
     activeTune.volume = 0
     musicState = false
-  } else {
+  } else { // if music is muted unmute it 
     activeTune.volume = 0.1
     musicState = true
   }
 }
 
-// functions to move the ghosts around the grid randomly (pretty bad ai for now)
-let interval
-function randomMovement() {
+let Ghostinterval 
+function randomMovement() { // function to move the ghosts around the grid randomly (pretty bad ai for now)
   setTimeout(() => {
-    interval = setInterval(() => {
+    Ghostinterval = setInterval(() => {
       if (gameRunning === true) {
-        blinkyMovement()
-        pinkyMovement()
-        inkyMovement()
-        clydeMovement()
+        for (let i = 1; i < sprites.length; i++)
+          ghostMovement(i)
       }
     }, enemySpeed)
   }, 2000)
@@ -895,28 +652,20 @@ function playSound(src) { // plays a single sound
 }
 
 //!--------------------------Event Listeners-------------------------!//
-// startbutton.onclick.run startGame eventlistener
-startBtn.addEventListener('click', startGame)
-// mainmenubutton.onclick.return mainmenu eventlistener
-mainMenuBtn.forEach(btn => {
+startBtn.addEventListener('click', startGame) // event listener for "play" button
+mainMenuBtn.forEach(btn => { // event listener for all main menu buttons
   btn.addEventListener('click', function() {
-    swapScreen(0)
+    swapScreen(0) // takes to main menu screen
   })
 })
-// keystroke listener event that listens for key presses
-document.addEventListener('keydown', keyPress)
-
-// mutebutton listener to mute all sound and music
-mute.addEventListener('click', toggleMusic)
+document.addEventListener('keydown', keyPress) // keystroke listener for pacman movement
+mute.addEventListener('click', toggleMusic) // mutebutton listener to mute all sound and music
 //!--------------------------Page Load-------------------------!//
-// hide all screens and only show main menu upon page load
-swapScreen(gameState)
+swapScreen(gameState) // hide all screens and only show main menu upon page load
 
-// function to play relevant audio given an index
-let activeTune
-let musicInterval
-
-function playMusic (audioNumber, frequency) {
+let activeTune // active song varialble
+let musicInterval // continuos music playing interval
+function playMusic (audioNumber, frequency) { // function to play relevant audio given an index
   activeTune = new Audio(audios[audioNumber][audioNumber])
   activeTune.volume = 0.1
   musicInterval  = setInterval(() => {
@@ -924,12 +673,8 @@ function playMusic (audioNumber, frequency) {
   }, frequency)
 }
 
-// play the intro tune until start button is clicked
-// playing intro tune on page load once it goes into a loop there after
-const introTune = new Audio(audios[0][0])
-introTune.volume = 0.1
-introTune.play()
-playMusic(gameState,5000)
+playSound(audios[0][0]) // playing intro tune on page load once it goes into a loop there after
+playMusic(gameState,5000) // play the intro tune until start button is clicked
 
-localStorage.setItem('highscore',highScore)
-highScoreDisplay.forEach(display => display.innerText = currentScore)
+localStorage.setItem('highscore',highScore) // highscore storage
+highScoreDisplay.forEach(display => display.innerText = currentScore) // highscore display
