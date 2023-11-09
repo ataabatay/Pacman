@@ -1,5 +1,4 @@
 console.log('working')
-
 //!--------------------------Elements-------------------------!//
 // All gamestates - these are individual pages and include
 // 0: start-menu screen (optional)
@@ -8,41 +7,21 @@ console.log('working')
 // 3: gameover-screen (required)
 // 4: win-screen (optional)
 const gameStates = document.querySelectorAll('.gamestate')
-
-// play button - to start gameplay
-const startBtn = document.querySelector('.start-play')
-
-// main menu button - to return to main menu
-const mainMenuBtn = document.querySelectorAll('.main-menu')
-
-// grid-wrapper width to create the cells
-const gridWrapperWidth = document.querySelector('.grid-wrapper').offsetWidth
-
-// grid area to create and append cells into
-const grid = document.querySelector('.grid')
-
-// current-score - to show current score
-const currentScoreDisplay = document.querySelector('.current-score .nominal-score')
-
-// remaining food - to show remaining food on the grid
-const remainingFoodDisplay = document.querySelector('.remaining-food .nominal-score')
-
-// final-score on losing - to show final score
-const lostScoreDisplay = document.querySelector('.lost-score .nominal-score')
-
-// final-score on losing - to show final score
-const wonScoreDisplay = document.querySelector('.won-score .nominal-score')
-
-// high-score - to fetch and show the high score from localstorage
-const highScoreDisplay = document.querySelectorAll('.high-score .nominal-score')
-
-// available lives area to manipulate how many lives the player has
-const remainingLives = document.querySelector('.lives-remaining')
-
-// READY! disclaimer to display or not
-const ready = document.querySelector('.floating-ready')
+const startBtn = document.querySelector('.start-play') // play button - to start gameplay
+const mainMenuBtn = document.querySelectorAll('.main-menu') // main menu button - to return to main menu
+const gridWrapperWidth = document.querySelector('.grid-wrapper').offsetWidth // grid-wrapper width to create the cells
+const grid = document.querySelector('.grid') // grid area to create and append cells into
+const currentScoreDisplay = document.querySelector('.current-score .nominal-score') // current-score - to show current score
+const remainingFoodDisplay = document.querySelector('.remaining-food .nominal-score') // remaining food - to show remaining food on the grid
+const lostScoreDisplay = document.querySelector('.lost-score .nominal-score') // final-score on losing - to show final score
+const wonScoreDisplay = document.querySelector('.won-score .nominal-score') // final-score on losing - to show final score
+const highScoreDisplay = document.querySelectorAll('.high-score .nominal-score') // high-score - to fetch and show the high score from localstorage
+const remainingLives = document.querySelector('.lives-remaining') // available lives area to manipulate how many lives the player has
+const ready = document.querySelector('.floating-ready') // READY! disclaimer to display or not at game start
+const mute = document.querySelector('.mute') // mute button
 
 //!--------------------------Variables-------------------------!//
+let musicState = true // music is toggled on on page load
 let currentScore = 0 // the actual current score value
 let remainingFood = null // the actual count of available food on the screen
 let finalScore = null // the actual current score value
@@ -50,6 +29,9 @@ let highScore = 0 // high score value
 let cells = [] // cells - every individual cell that's created with the createGrid() function
 const powerUpDuration = 10 // duration of power up mode when you eat a power pellet
 let powerUpState = false // power up mode checker for logic
+let lives = null // available lives at pageload
+let gameState = 0 // on page load we start on the start-menu game state 0
+let gameRunning = false // boolean to help with other functions checking to see if the game is running or not
 
 // Directions array to use for random ghost movement
 // 0: up
@@ -57,30 +39,13 @@ let powerUpState = false // power up mode checker for logic
 // 2: down
 // 3: left
 const directions = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft']
-
-// !CHANGE THIIIIS!
 const enemySpeed = 100 // Interval variable dictating ghost movement speed
-
-let lives = null // available lives
-
-// gameState - this will be the global variable that's deciding which screen is being shown
-// 0: start-menu screen (optional)
-// 1: loading screen (optional)
-// 2: gameplay-screen (required)
-// 3: gameover-screen (required)
-// 4: win-screen (optional)
-let gameState = 0 // on page load we start on the start-menu
-
-let gameRunning = false // gameRunning - boolean to help with other functions checking to see if the game is running or not
-
-// standard Pacman maze width and height ratios
-const stdWidth = 28 // this will be the base variable we use to decide how many grid cells to create
-const stdHeight = 31 // this will be the base variable we use to decide how many rows of cells we're going to create
-
+const stdWidth = 28 // standard Pacman maze width and height ratios
+const stdHeight = 31 /// standard Pacman maze width and height ratios
 const width = gridWrapperWidth / stdWidth // the width and height of our cells dynamically created based on screen size
 const cellCount = stdHeight * stdWidth // cell count - how many grid cells we need to create
 
-// Out of bounds areas in the maze indexed from top left to bottom right
+// Out of bounds areas in the maze indexed from top left to bottom right (would've done with canvas if allowed :))
 const oobs = [
   {
     start: 58,
@@ -284,7 +249,7 @@ const oobs = [
   }
 ]
 
-// All sprites and their characteristics in an array of objects
+// All sprites and their characteristics in an array of objects (should'food here, next time!)
 const sprites = [
   {
     name: 'pacman',
@@ -344,50 +309,42 @@ const audios = [
 ]
 
 //!--------------------------Functions-------------------------!//
-// screen swapper to move from screen to screen
-function swapScreen(gameState) {
-  // hide all screens to decide which one to show later
+
+function swapScreen(gameState) { // screen swapper to move from screen to screen
+  // hide all screens
   gameStates.forEach(state => state.classList.add('hidden'))
-  // show the relevant screen
+  // show the active screen
   gameStates[gameState].classList.remove('hidden')
 }
 
-// startGame() - function to start the game upon start button 'click'
-function startGame() {
-  clearInterval(musicInterval)
-  gameState = 1
-  // playMusic(gameState)
-  // swap to loading screen
-  swapScreen(gameState)
-  // swap to gameplay screen with a little delay to simulate loading
-  setTimeout(function() {
+function startGame() { // startGame() - function to start the game upon start button 'click'
+  clearInterval(musicInterval) // stop active music
+  gameState = 1 // change to loading screen gamestate
+  swapScreen(gameState) // swap to loading screen
+  setTimeout(function() { // swap to gameplay screen with a little delay to simulate loading
     gameState = 2
     swapScreen(gameState)
   }, 2500)
-  // time delay to get the player ready to start
-  setTimeout(function() {
+  setTimeout(function() { // time delay to get the player ready to start
     gameRunning = true
-    ready.classList.add('hidden')
+    ready.classList.add('hidden') // hide the READY! disclaimer
     playMusic(gameState, 0)
   }, 5500)
-  createGrid()
-  randomMovement()
+  createGrid() // function to create grid where the game will be played 
+  randomMovement() // start making the ghosts move randomly on the map
 }
 
-// createGrid() - function to create a grid where the game will be played
-function createGrid() {
-  function generateBounds() {
-    // creates a grid of cells
+
+function createGrid() { //creates a grid where the game will be played
+  function generateBounds() { // creates a grid of cells
     for (let i = 0; i < cellCount; i++) {
-      const cell = document.createElement('div')
-      cell.innerText = i // REMOVE WHEN DONE
+      const cell = document.createElement('div') // create individual divs for each cell
       cell.id = i
       cell.style.width = `${width}px`
       cell.style.height = `${width}px`
-      // adds ".cell" class to all the created divs
-      cell.classList.add('cell')
-      cells.push(cell)
-      grid.append(cell)
+      cell.classList.add('cell') // adds ".cell" class to all the created divs
+      cells.push(cell) // add each cell to an array
+      grid.append(cell) // add each cell to the screen
     }
     
     // adds ".oob" class to the cell divs that are out-of-bounds
@@ -414,40 +371,28 @@ function createGrid() {
   }
   generateBounds()
   
-  // function to add food and power pellets to the grid
-  function addFoodAndPellets() {
-  // creates food for Pacman on the available cells
-  // adds ".food" class to all the cell divs where food will be
-    cells.forEach(cell => !cell.classList.contains('oob') ? cell.classList.add('food') : '')
-    // remove the food classes from Ghost nest + starting position as there are not meant to be any food
-    cells[349].classList.remove('food')
-    cells[350].classList.remove('food')
-    cells[657].classList.remove('food')
-    for (let i = 375; i < 432; i += 28) {
+  function addFoodAndPellets() { // adds food and power pellets to the grid
+    cells.forEach(cell => !cell.classList.contains('oob') ? cell.classList.add('food') : '') // if a cell is not out of bounds add food (to be tweaked later in the code)
+    cells[349].classList.remove('food') // remove food from starting positions of sprites
+    cells[350].classList.remove('food') // remove food from starting positions of sprites
+    cells[657].classList.remove('food') // remove food from starting positions of sprites
+    for (let i = 375; i < 432; i += 28) { // remove  food from Ghost nest
       for (let j = 0; j < 6; j++) {
         cells[i + j].classList.remove('food')
       }
     }
-    // adds power pellets to the map
-    // removes food and adds ".powerPellet" class to the cell divs where power pellets will be placed
-    // coordintes of the powerPellets
-    const powerPellets = [85, 110, 645, 670]
-    powerPellets.forEach(pellet => cells[pellet].classList.remove('food'))
-    powerPellets.forEach(pellet => cells[pellet].classList.add('powerPellet'))
-
-    // !!CHANGE THIS BACK!! //
-    // set the remainingFood so we can track and decide if the game is won or not
-    cells.forEach(cell => cell.classList.contains('food') ? remainingFood++ : '')
-    cells.forEach(cell => cell.classList.contains('powerPellet') ? remainingFood++ : '')
+    const powerPellets = [85, 110, 645, 670] // defining location of power pellets
+    powerPellets.forEach(pellet => cells[pellet].classList.remove('food')) // remove food where power pellets will be placed
+    powerPellets.forEach(pellet => cells[pellet].classList.add('powerPellet')) // add power pellets to the map
+    cells.forEach(cell => cell.classList.contains('food') ? remainingFood++ : '') // counting and adding foods to remaining food count
+    cells.forEach(cell => cell.classList.contains('powerPellet') ? remainingFood++ : '') // counting and adding power pellets to remaining food count
   }
   addFoodAndPellets()
 
-  // function to create Pacman and all Ghosts and place them at their starting position
-  addSprites()
+  addSprites() // creates Pacman and all Ghosts and place them at their starting position
 
-  // function to set lives to 3 at the beginning of the game and display lives
   lives = 3
-  function addLives() {
+  function addLives() {// sets lives to 3 at the beginning of the game and display lives
     for (let i = 0; i < lives; i++) {
       const life = document.createElement('div')
       life.style.width = `${width}px`
@@ -458,105 +403,46 @@ function createGrid() {
   }
   addLives()
 }
-// createGrid()
 
-// clearGrid() - function to clear the grid for the new gameplay
-function resetGrid() {
-  // Remove all previously created divs
-  cells.forEach(cell => cell.remove())
-  cells = []
 
-  // reset current score to 0 and display it
-  currentScore = 0
-  currentScoreDisplay.innerText = 0
-  
-  // Reset lives to 0
-  remainingLives.innerHTML = ''
-
-  // Reset remaining food to 0 and display it
-  remainingFood = 0
-  remainingFoodDisplay.innerText = remainingFood
+function resetGrid() { // clears the grid to enable recreation at new gameplay
+  cells.forEach(cell => cell.remove()) // Remove previously created cell divs
+  cells = [] // empty the cells array to be able to add the new cells upon new game
+  currentScore = 0 // reset current score to 0 and display it
+  currentScoreDisplay.innerText = 0 // display it
+  remainingLives.innerHTML = '' // remove lives from remaining lives div
+  remainingFood = 0 // reset remaining food
+  remainingFoodDisplay.innerText = remainingFood // display it
 }
 
-// movement is enabled by keydown style
-// When Pacman changes position (moves) - a value is added to the current position based on the key pressed and updating current position and repeating every time that event happens
-function keyPress(evt) {
-  if (gameRunning === true) {
-    // remove pacman from current location
-    removePacman(evt.code)
-    // listen to which key is pressed and check to ensure the cell to move does not have oob class
-    // using zero index which I know is bad but will fix if I have time, just looks ugly and tough to read in long version
-    // handles when Pacman is at the right warp on the map
-    if (evt.code === 'ArrowRight' && sprites[0].currentPos === 419) {
-      sprites[0].currentPos = 392
-    // handles when Pacman is at the left warp on the map
-    } else if (evt.code === 'ArrowLeft' && sprites[0].currentPos === 392) {
-      sprites[0].currentPos = 419
-    } else if (evt.code === 'ArrowUp' && !cells[sprites[0].currentPos - stdWidth].classList.contains('oob')) {
-      sprites[0].currentPos -= stdWidth
-    } else if (evt.code === 'ArrowRight' && !cells[sprites[0].currentPos + 1].classList.contains('oob')) {
-      sprites[0].currentPos++
-    } else if (evt.code === 'ArrowDown' && !cells[sprites[0].currentPos + stdWidth].classList.contains('oob')) {
-      sprites[0].currentPos += stdWidth
-    } else if (evt.code === 'ArrowLeft' && !cells[sprites[0].currentPos - 1].classList.contains('oob')) {
-      sprites[0].currentPos--
-    }
-    // move pacman based on the new current position
-    movePacman(sprites[0].currentPos, evt.code)
+function keyPress(evt) { //handles pacman movement
+  if (gameRunning === false) return // check game is running
+  removePacman(evt.code) // remove pacman from previous location
+  if (evt.code === 'ArrowRight' && sprites[0].currentPos === 419) { 
+    sprites[0].currentPos = 392 // warps pacman to the left of screen when pacman is at the right warp
+  } else if (evt.code === 'ArrowLeft' && sprites[0].currentPos === 392) { 
+    sprites[0].currentPos = 419 // warps pacman to the right of screen when pacman is at the left warp
+  } else if (evt.code === 'ArrowUp' && !cells[sprites[0].currentPos - stdWidth].classList.contains('oob')) {
+    sprites[0].currentPos -= stdWidth // move up
+  } else if (evt.code === 'ArrowRight' && !cells[sprites[0].currentPos + 1].classList.contains('oob')) {
+    sprites[0].currentPos++ // move right
+  } else if (evt.code === 'ArrowDown' && !cells[sprites[0].currentPos + stdWidth].classList.contains('oob')) {
+    sprites[0].currentPos += stdWidth // move down
+  } else if (evt.code === 'ArrowLeft' && !cells[sprites[0].currentPos - 1].classList.contains('oob')) {
+    sprites[0].currentPos-- // move left
   }
+  movePacman(sprites[0].currentPos, evt.code) // move pacman based on the new current position
 }
 
-function winCheck () {
-  if (remainingFood === 0) {
-    clearInterval(musicInterval)
-    highScoreCheck()
-    clearInterval(interval)
-    clearInterval(realityChecker)
-    // stop running the game
-    gameRunning = false
-    // change the gameState to won
-    gameState = 4
-    // swap to win screen
-    swapScreen(gameState)
-    // play game won music
-    const winSound = new Audio(audios[11][11])
-    winSound.volume = 0.2
-    winSound.play()
-    // set current score to final score
-    finalScore = currentScore
-    // show final score
-    wonScoreDisplay.innerText = finalScore
-    // pacman returns to initial position
-    // ghosts return to initial position
-    removeGhosts()
-    removePacman()
-    // reset current position of all sprites to starting position
-    sprites.forEach(sprite => sprite.currentPos = sprite.startPos)
-    resetGrid()
-  }
-}
-
-// move() - function to make Pacman move around the screen
-function movePacman(newPosition, direction) {
-  // If Pacman ends on a location with a class a ghost
-  if (cells[newPosition].classList.contains('ghost')) {
-    // IF PACMAN TOUCHES A GHOST WHEN PACMAN IS IN POWER UP MODE //
-    // find which ghost is touched
-    let touchedGhost = sprites.findIndex((sprite => cells[newPosition].classList.contains(sprite.name)))
-    console.log(touchedGhost)
-    if (powerUpState === true) {
-      // increase score by 200 (later to be implemented each ghost eaten in succession increases the score by double)
-      currentScore += 200
-      // ghost is removed from location
-      // ghost gets out of vulnerable mode
-      // ghost is returned to starting position
-      removeSpecificGhost(touchedGhost, newPosition)
+function movePacman(newPosition, direction) { // make Pacman move around the screen given new position and direction
+  if (cells[newPosition].classList.contains('ghost')) { // check ghost collision
+    const touchedGhost = sprites.findIndex((sprite => cells[newPosition].classList.contains(sprite.name))) // find which ghost is collided
+    if (powerUpState === true) { // if pacman is in powerup mode
+      currentScore += 200 // increase score by 200
+      removeSpecificGhost(touchedGhost, newPosition) // ghost is removed from location and returned to starting position
     } else {
-    // remove a life
-      removeLife()
-      console.log(`Pacman touched a ghost => ${lives} lives remain`)
-      // check how many lives are left if 0 cue the game over function
-      if (lives === 0) {
+      removeLife() // remove a life
+      if (lives === 0) { // if 0 life left cue game over (this code repeats and for the life of me I couldn't refactor)
         gameOver()
         return
       } else {
@@ -564,63 +450,71 @@ function movePacman(newPosition, direction) {
         return
       }
     }
-  } else if (cells[newPosition].classList.contains('food')) {
-    currentScore += 10
-    remainingFood--
-    // Remove food screen when Pacman eats it
-    cells[newPosition].classList.remove('food')
-    // play munching sound
-    const munchSound = new Audio(audios[8][8])
-    munchSound.volume = 0.05
-    munchSound.play()
-  } else if (cells[newPosition].classList.contains('powerPellet')) {
-    currentScore += 50
-    remainingFood--
-    // play eating power pellet sound
-    const munchSound = new Audio(audios[9][9])
-    munchSound.volume = 0.05
-    munchSound.play()
-    powerUpMode()
-    // Remove power pellet from screen when Pacman eats it
-    cells[newPosition].classList.remove('powerPellet')
-    // TO ADD: vulnerability and bonus mode to chase ghosts add as a function
+  } else if (cells[newPosition].classList.contains('food')) { // check food collision
+    currentScore += 10 // increase score
+    remainingFood-- // decrease remaining food
+    cells[newPosition].classList.remove('food') // remove food from screen
+    playSound(audios[8][8]) // play food eating sound
+  } else if (cells[newPosition].classList.contains('powerPellet')) { // check power pellet collision
+    currentScore += 50 // increase score
+    remainingFood-- // decrease remaining food
+    playSound(audios[9][9]) // play power pellet eating sound
+    powerUpMode() // go into powerUpMode
+    cells[newPosition].classList.remove('powerPellet') // remove power pellet from screen
   }
-  highScoreCheck()
-  winCheck()
-  currentScoreDisplay.innerText = parseFloat(currentScore)
-  remainingFoodDisplay.innerText = parseFloat(remainingFood)
-  cells[newPosition].classList.add('pacman', `${direction}`)
-
-// If Pacman ends on a location with power pellet
-// increase score by 50
-// remove power pellet from the screen
-// add .vulnerable class to all the ghosts
-// when ghosts are in vulnerable state:
-// pacman can eat ghosts as if they're food and gain 200 points
-// an eaten ghost:
-  // returns to starting point
-  // vulnerable state is removed
-  // restarts the chase
+  highScoreCheck() // check if current score > higherscore
+  winCheck() // check if game is won
+  currentScoreDisplay.innerText = parseFloat(currentScore) // increase score display
+  remainingFoodDisplay.innerText = parseFloat(remainingFood) // reduce remaining food display
+  cells[newPosition].classList.add('pacman', `${direction}`) // add pacman sprite to new cell
 }
 
-// function to get Pacman invincible mode ---- TO BE DONE
-function powerUpMode() {
+function winCheck () { //check if game is won
+  if (remainingFood === 0) { // win condition is no food remains
+    clearInterval(musicInterval) // stop current music
+    highScoreCheck() // check if current score > higherscore
+    gameRunning = false // stop running the game
+    gameState = 4 // change the gameState to winscreen
+    swapScreen(gameState) // swap to win screen
+    playSound(audios[11][11]) // play game won music
+    finalScore = currentScore // set current score to final score
+    wonScoreDisplay.innerText = finalScore // show final score
+    removeGhosts() // remove ghosts from map
+    removePacman(sprites[0].currentPos) // remove pacman from map
+    sprites.forEach(sprite => sprite.currentPos = sprite.startPos) // return everyone to starting position
+    resetGrid() // reset the grid
+  }
+}
+
+function powerUpMode() { // Pacman goes into powerup mode
   powerUpState = true
-  console.log('Power Up Active')
-  // play power up mode song
-  const powerUpModeSong = new Audio(audios[10][10])
-  powerUpModeSong.volume = 0.05
-  powerUpModeSong.play()
-  setTimeout(() => {
+  playSound(audios[10][10]) // play power up mode sound
+  setTimeout(() => { //deactivate powerup after its duration
     powerUpState = false
-    console.log('Power Up Deactivated')
   }, powerUpDuration * 1000)
 }
 
-// remove() - function to remove Pacman from the previous cell
-function removePacman(prevDir) {
+function removePacman(prevDir) { // removes Pacman from previous cell
   cells[sprites[0].currentPos].classList.remove('pacman','player',`${prevDir}`)
 }
+
+function removeGhosts() { // Removes all the ghosts from the screen pretty hardcoded will check later
+  cells[sprites[1].currentPos].classList.remove('blinky','ghost')
+  cells[sprites[2].currentPos].classList.remove('pinky','ghost')
+  cells[sprites[3].currentPos].classList.remove('inky','ghost')
+  cells[sprites[4].currentPos].classList.remove('clyde','ghost')
+}
+
+// // !
+// function ghostMovement(ghostNumber) {
+//   function removeGhost() { // removes ghost from previous cell
+//     cells[sprites[ghostNumber].currentPos].classList.remove(`${sprites[ghostNumber].name}`,'ghost','vulnerable')
+//   }
+//   removeGhost() 
+
+
+// }
+
 
 // Ghosts AI to be REREAD AND REWORK RIGHT NOW ITS JUST BAD
 function blinkyMovement() {
@@ -943,14 +837,6 @@ function addSprites() {
   sprites.forEach(sprite => cells[sprite.startPos].classList.add(`${sprite.name}`,`${sprite.nature}`,`${sprite.startingLook}`))
 }
 
-// Removes all the ghosts from the screen pretty hardcoded will check later
-function removeGhosts() {
-  cells[sprites[1].currentPos].classList.remove('blinky','ghost')
-  cells[sprites[2].currentPos].classList.remove('pinky','ghost')
-  cells[sprites[3].currentPos].classList.remove('inky','ghost')
-  cells[sprites[4].currentPos].classList.remove('clyde','ghost')
-}
-
 function removeSpecificGhost(touchedGhost, newPosition) {
   cells[newPosition].classList.remove(`${sprites[touchedGhost].name}`,'ghost','vulnerable')
   sprites[touchedGhost].currentPos = sprites[touchedGhost].startPos
@@ -969,16 +855,43 @@ function removeLife() {
   }
 }
 
-// function to check if the current score is higher than highscore and update highscore
-function highScoreCheck() {
-  // the actual high score value stored
+function highScoreCheck() { //check if current score > highscore, update highscore
   if (currentScore > parseInt(localStorage.getItem('highscore'))) {
-    // set the new highscore
-    highScore = currentScore
-    // update the visuals for highscore
-    highScoreDisplay.forEach(display => display.innerText = highScore)
-    localStorage.setItem('highscore', highScore)
+    highScore = currentScore // set the new highscore
+    highScoreDisplay.forEach(display => display.innerText = highScore) // update highscore display
+    localStorage.setItem('highscore', highScore) // update highscore localstorage
   }
+}
+
+function toggleMusic () {
+  if (musicState === true) {
+    activeTune.volume = 0
+    musicState = false
+  } else {
+    activeTune.volume = 0.1
+    musicState = true
+  }
+}
+
+// functions to move the ghosts around the grid randomly (pretty bad ai for now)
+let interval
+function randomMovement() {
+  setTimeout(() => {
+    interval = setInterval(() => {
+      if (gameRunning === true) {
+        blinkyMovement()
+        pinkyMovement()
+        inkyMovement()
+        clydeMovement()
+      }
+    }, enemySpeed)
+  }, 2000)
+}
+
+function playSound(src) { // plays a single sound
+  const sound = new Audio(src)
+  sound.volume = 0.05
+  sound.play()
 }
 
 //!--------------------------Event Listeners-------------------------!//
@@ -993,6 +906,8 @@ mainMenuBtn.forEach(btn => {
 // keystroke listener event that listens for key presses
 document.addEventListener('keydown', keyPress)
 
+// mutebutton listener to mute all sound and music
+mute.addEventListener('click', toggleMusic)
 //!--------------------------Page Load-------------------------!//
 // hide all screens and only show main menu upon page load
 swapScreen(gameState)
@@ -1003,8 +918,6 @@ let musicInterval
 
 function playMusic (audioNumber, frequency) {
   activeTune = new Audio(audios[audioNumber][audioNumber])
-  console.log(activeTune)
-  console.log(gameState)
   activeTune.volume = 0.1
   musicInterval  = setInterval(() => {
     activeTune.play()
@@ -1017,29 +930,6 @@ const introTune = new Audio(audios[0][0])
 introTune.volume = 0.1
 introTune.play()
 playMusic(gameState,5000)
-
-// functions to move the ghosts around the grid randomly (pretty bad ai for now)
-let interval
-
-function randomMovement() {
-  setTimeout(() => {
-    interval = setInterval(() => {
-      if (gameRunning === true) {
-        blinkyMovement()
-        pinkyMovement()
-        inkyMovement()
-        clydeMovement()
-      }
-    }, enemySpeed)
-  }, 2000)
-}
-
-// Reality checker
-const realityChecker = setInterval(() => {
-  console.log(gameRunning)
-  console.log(musicInterval)
-  // const introSound = new Audio('../sounds/intro.wav').play()
-}, 1000)
 
 localStorage.setItem('highscore',highScore)
 highScoreDisplay.forEach(display => display.innerText = currentScore)
