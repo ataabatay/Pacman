@@ -48,7 +48,7 @@ let remainingFood = null // the actual count of available food on the screen
 let finalScore = null // the actual current score value
 let highScore = 0 // high score value
 let cells = [] // cells - every individual cell that's created with the createGrid() function
-let powerUpDuration = 20 // duration of power up mode when you eat a power pellet
+const powerUpDuration = 10 // duration of power up mode when you eat a power pellet
 let powerUpState = false // power up mode checker for logic
 
 // Directions array to use for random ghost movement
@@ -68,7 +68,7 @@ let lives = null // available lives
 // 1: loading screen (optional)
 // 2: gameplay-screen (required)
 // 3: gameover-screen (required)
-// 4: pause-screen (optional)
+// 4: win-screen (optional)
 let gameState = 0 // on page load we start on the start-menu
 
 let gameRunning = false // gameRunning - boolean to help with other functions checking to see if the game is running or not
@@ -327,6 +327,22 @@ const sprites = [
   }
 ]
 
+// All audio files
+const audios = [
+  { 0: '../sounds/intro.wav' },
+  { 1: '../sounds/waitingx.wav' }, // not used was a bit too much
+  { 2: '../sounds/gameplaysiren.wav' },
+  { 3: '../sounds/eat.wav' },
+  { 4: '../sounds/eatghost.wav' },
+  { 5: '../sounds/death.wav' },
+  { 6: '../sounds/munch.wav' },
+  { 7: '../sounds/munch2.wav' },
+  { 8: '../sounds/credit.wav' },
+  { 9: '../sounds/eatpowerpellet.wav' },
+  { 10: '../sounds/powerpelletsong.wav' },
+  { 11: '../sounds/winscreen.wav' }
+]
+
 //!--------------------------Functions-------------------------!//
 // screen swapper to move from screen to screen
 function swapScreen(gameState) {
@@ -338,19 +354,22 @@ function swapScreen(gameState) {
 
 // startGame() - function to start the game upon start button 'click'
 function startGame() {
+  clearInterval(musicInterval)
   gameState = 1
+  // playMusic(gameState)
   // swap to loading screen
   swapScreen(gameState)
   // swap to gameplay screen with a little delay to simulate loading
   setTimeout(function() {
     gameState = 2
     swapScreen(gameState)
-  }, 3000)
+  }, 2500)
   // time delay to get the player ready to start
   setTimeout(function() {
     gameRunning = true
     ready.classList.add('hidden')
-  }, 5000)
+    playMusic(gameState, 0)
+  }, 5500)
   createGrid()
   randomMovement()
 }
@@ -489,19 +508,30 @@ function keyPress(evt) {
 
 function winCheck () {
   if (remainingFood === 0) {
+    clearInterval(musicInterval)
     highScoreCheck()
     clearInterval(interval)
+    clearInterval(realityChecker)
     // stop running the game
     gameRunning = false
-    // chaneg the gameState to won
+    // change the gameState to won
     gameState = 4
     // swap to win screen
     swapScreen(gameState)
+    // play game won music
+    const winSound = new Audio(audios[11][11])
+    winSound.volume = 0.2
+    winSound.play()
     // set current score to final score
     finalScore = currentScore
     // show final score
-    wonScoreDisplay.innerText = finalScore 
-    restartLevel()
+    wonScoreDisplay.innerText = finalScore
+    // pacman returns to initial position
+    // ghosts return to initial position
+    removeGhosts()
+    removePacman()
+    // reset current position of all sprites to starting position
+    sprites.forEach(sprite => sprite.currentPos = sprite.startPos)
     resetGrid()
   }
 }
@@ -539,9 +569,17 @@ function movePacman(newPosition, direction) {
     remainingFood--
     // Remove food screen when Pacman eats it
     cells[newPosition].classList.remove('food')
+    // play munching sound
+    const munchSound = new Audio(audios[8][8])
+    munchSound.volume = 0.05
+    munchSound.play()
   } else if (cells[newPosition].classList.contains('powerPellet')) {
     currentScore += 50
     remainingFood--
+    // play eating power pellet sound
+    const munchSound = new Audio(audios[9][9])
+    munchSound.volume = 0.05
+    munchSound.play()
     powerUpMode()
     // Remove power pellet from screen when Pacman eats it
     cells[newPosition].classList.remove('powerPellet')
@@ -569,6 +607,10 @@ function movePacman(newPosition, direction) {
 function powerUpMode() {
   powerUpState = true
   console.log('Power Up Active')
+  // play power up mode song
+  const powerUpModeSong = new Audio(audios[10][10])
+  powerUpModeSong.volume = 0.05
+  powerUpModeSong.play()
   setTimeout(() => {
     powerUpState = false
     console.log('Power Up Deactivated')
@@ -840,7 +882,11 @@ function clydeMovement() {
 
 // function to restart level if there are sufficient remaining lives
 function restartLevel() {
-  console.log('Level restarted!')
+  clearInterval(musicInterval)
+  // play death sound
+  const deathSound = new Audio(audios[5][5])
+  deathSound.volume = 0.05
+  deathSound.play()
   // set the game to not run until it's run again
   gameRunning = false
   // pacman returns to initial position
@@ -856,11 +902,14 @@ function restartLevel() {
   setTimeout(() => {
     gameRunning = true
     ready.classList.add('hidden')
+    playMusic(gameState, 0)
   }, 3000)
 }
 
 // function to handle when the game is over
 function gameOver() {
+  console.log(activeTune)
+  clearInterval(musicInterval)
   highScoreCheck()
   clearInterval(interval)
   console.log('Game Over!')
@@ -870,12 +919,23 @@ function gameOver() {
   gameState = 3
   // swap to gameover screen
   swapScreen(gameState)
+  // play death sound
+  const gameOverSound = new Audio(audios[5][5])
+  gameOverSound.volume = 0.2
+  gameOverSound.play()
   // set current score to final score
   finalScore = currentScore
   // show final score
+  activeTune = null
   lostScoreDisplay.innerText = finalScore  
-  restartLevel()
+    // pacman returns to initial position
+  // ghosts return to initial position
+  removeGhosts()
+  removePacman()
+  // reset current position of all sprites to starting position
+  sprites.forEach(sprite => sprite.currentPos = sprite.startPos)
   resetGrid()
+  clearInterval(realityChecker)
 }
 
 // function to create Pacman and all Ghosts and place them at their starting position
@@ -937,6 +997,27 @@ document.addEventListener('keydown', keyPress)
 // hide all screens and only show main menu upon page load
 swapScreen(gameState)
 
+// function to play relevant audio given an index
+let activeTune
+let musicInterval
+
+function playMusic (audioNumber, frequency) {
+  activeTune = new Audio(audios[audioNumber][audioNumber])
+  console.log(activeTune)
+  console.log(gameState)
+  activeTune.volume = 0.1
+  musicInterval  = setInterval(() => {
+    activeTune.play()
+  }, frequency)
+}
+
+// play the intro tune until start button is clicked
+// playing intro tune on page load once it goes into a loop there after
+const introTune = new Audio(audios[0][0])
+introTune.volume = 0.1
+introTune.play()
+playMusic(gameState,5000)
+
 // functions to move the ghosts around the grid randomly (pretty bad ai for now)
 let interval
 
@@ -956,10 +1037,9 @@ function randomMovement() {
 // Reality checker
 const realityChecker = setInterval(() => {
   console.log(gameRunning)
+  console.log(musicInterval)
   // const introSound = new Audio('../sounds/intro.wav').play()
 }, 1000)
-
-
 
 localStorage.setItem('highscore',highScore)
 highScoreDisplay.forEach(display => display.innerText = currentScore)
