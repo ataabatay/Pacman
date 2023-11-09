@@ -38,7 +38,7 @@ let gameRunning = false // boolean to help with other functions checking to see 
 // 2: down
 // 3: left
 const directions = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft']
-const enemySpeed = 100 // Interval variable dictating ghost movement speed
+const enemySpeed = 175 // Interval variable dictating ghost movement speed
 const stdWidth = 28 // standard Pacman maze width and height ratios
 const stdHeight = 31 /// standard Pacman maze width and height ratios
 const width = gridWrapperWidth / stdWidth // the width and height of our cells dynamically created based on screen size
@@ -401,7 +401,6 @@ function createGrid() { //creates a grid where the game will be played
   }
   addLives()
 }
-
 
 function resetGrid() { // clears the grid to enable recreation at new gameplay
   cells.forEach(cell => cell.remove()) // Remove previously created cell divs
