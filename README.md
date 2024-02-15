@@ -39,10 +39,10 @@ The goal was to develop a browser game using only HTML, CSS and JavaScript withi
 First part of the work was research and an extensive plan with wireframes and pseudocode. Below are snippets from the research and wireframes.
 
 ### Research
-_**(Images to come)**_
+![1](https://github.com/ataabatay/Pacman/assets/25418371/233eacc1-e588-4017-b4df-44bc78ecf658)
 
 ### Wireframes
-_**(Images to come)**_
+![2](https://github.com/ataabatay/Pacman/assets/25418371/a9e561bf-47a1-479e-a07d-5e433507a896)
 
 These were followed by the actual coding which followed 4 iterations of the game. The plan was followed as a checklist using Notion to save time but use of Jira was considered to create tickets and track.
 
@@ -67,19 +67,184 @@ Next, I created the createGrid() function which draws the actual grid on screen 
 - placement of food pellets on all relevant grid cells,
 - placement of power pellets on specific grid cells.
 
-_**(Images to come)**_
+```javascript
+function createGrid() { //creates a grid where the game will be played
+  function generateBounds() { // creates a grid of cells
+    for (let i = 0; i < cellCount; i++) {
+      const cell = document.createElement('div') // create individual divs for each cell
+      cell.id = i
+      cell.style.width = `${width}px`
+      cell.style.height = `${width}px`
+      cell.classList.add('cell') // adds ".cell" class to all the created divs
+      cells.push(cell) // add each cell to an array
+      grid.append(cell) // add each cell to the screen
+    }
+    
+    // adds ".oob" class to the cell divs that are out-of-bounds
+    // creates the outer wall
+    for (let i = 0; i < cellCount; i++) {
+      if (i < stdWidth || i % stdWidth === stdWidth - 1 || i > cellCount - stdWidth || i % stdWidth === 0) {
+        cells[i].classList.add('oob')
+      }
+    }
+    
+    // creates inner walls with given coordinates of the walls (defined in an array called 'oob' above)
+    function insideWallCreator (startingId, width, height) {
+      for (let i = startingId; i < startingId + (height * stdWidth); i = i + stdWidth) {
+        for (let j = 0; j < width; j++) {
+          cells[i + j].classList.add('oob')
+        }
+      }
+    }
+    oobs.forEach(oob => insideWallCreator(oob.start, oob.width, oob.height))
+
+    // creates warps - crazy and might be unnecessary to calculate like this rather than assigning ids but lets see might come in handy
+    cells[(Math.floor(stdHeight - 1) / 2) * stdWidth - 1].classList.remove('oob')
+    cells[(Math.floor(stdHeight - 1) / 2) * stdWidth - stdWidth].classList.remove('oob')
+  }
+  generateBounds()
+  function addFoodAndPellets() { // adds food and power pellets to the grid
+    cells.forEach(cell => !cell.classList.contains('oob') ? cell.classList.add('food') : '') // if a cell is not out of bounds add food (to be tweaked later in the code)
+    cells[349].classList.remove('food') // remove food from starting positions of sprites
+    cells[350].classList.remove('food') // remove food from starting positions of sprites
+    cells[657].classList.remove('food') // remove food from starting positions of sprites
+    for (let i = 375; i < 432; i += 28) { // remove  food from Ghost nest
+      for (let j = 0; j < 6; j++) {
+        cells[i + j].classList.remove('food')
+      }
+    }
+    const powerPellets = [85, 110, 645, 670] // defining location of power pellets
+    powerPellets.forEach(pellet => cells[pellet].classList.remove('food')) // remove food where power pellets will be placed
+    powerPellets.forEach(pellet => cells[pellet].classList.add('powerPellet')) // add power pellets to the map
+    cells.forEach(cell => cell.classList.contains('food') ? remainingFood++ : '') // counting and adding foods to remaining food count
+    cells.forEach(cell => cell.classList.contains('powerPellet') ? remainingFood++ : '') // counting and adding power pellets to remaining food count
+  }
+  addFoodAndPellets()
+  addSprites() // creates Pacman and all Ghosts and place them at their starting position
+  lives = 3
+  function addLives() {// sets lives to 3 at the beginning of the game and display lives
+    for (let i = 0; i < lives; i++) {
+      const life = document.createElement('div')
+      life.style.width = `${width}px`
+      life.style.height = `${width}px`
+      life.classList.add('life')
+      remainingLives.append(life)
+    }
+  }
+  addLives()
+}
+```
 
 Followed by placing Pacman sprite on grid with:
 - move() function for Pacman to move, abiding to the bounds of the grid,
 - movement control by keyUp, keyDown, keyLeft and keyRight events,
 - food pellet consumption and effects for Pacman inside the move function.
 
-**_(Images to come)_**
+```javascript
+function movePacman(newPosition, direction) { // make Pacman move around the screen given new position and direction
+  if (cells[newPosition].classList.contains('ghost')) { // check ghost collision
+    const touchedGhost = sprites.findIndex((sprite => cells[newPosition].classList.contains(sprite.name))) // find which ghost is collided
+    if (powerUpState === true) { // if pacman is in powerup mode
+      currentScore += 200 // increase score by 200
+      removeSpecificGhost(touchedGhost, newPosition) // ghost is removed from location and returned to starting position
+    } else {
+      removeLife() // remove a life
+      if (lives === 0) { // if 0 life left cue game over (this code repeats and for the life of me I couldn't refactor)
+        gameOver()
+        return
+      } else {
+        restartLevel() // if > 0 cue restart the level function
+        return
+      }
+    }
+  } else if (cells[newPosition].classList.contains('food')) { // check food collision
+    currentScore += 10 // increase score
+    remainingFood-- // decrease remaining food
+    cells[newPosition].classList.remove('food') // remove food from screen
+    
+    playSound(audios[8][8]) // play food eating sound
+  } else if (cells[newPosition].classList.contains('powerPellet')) { // check power pellet collision
+    currentScore += 50 // increase score
+    remainingFood-- // decrease remaining food
+    playSound(audios[9][9]) // play power pellet eating sound
+    powerUpMode() // go into powerUpMode
+    cells[newPosition].classList.remove('powerPellet') // remove power pellet from screen
+  }
+  highScoreCheck() // check if current score > higherscore
+  winCheck() // check if game is won
+  currentScoreDisplay.innerText = parseFloat(currentScore) // increase score display
+  remainingFoodDisplay.innerText = parseFloat(remainingFood) // reduce remaining food display
+  cells[newPosition].classList.add('pacman', `${direction}`) // add pacman sprite to new cell
+}
+```
 
 Followed by placing Ghost sprites on the grid with:
 - randomMovement() function using an interval loop to allow ghost movement on the grid while abiding the bounds of the grid.
 
-**_(Images to come)_**
+```javascript
+function ghostMovement(ghostNumber) { // Ghost movement logic
+  function removeGhost(ghostNumber) { // removes ghost from previous cell
+    cells[sprites[ghostNumber].currentPos].classList.remove(`${sprites[ghostNumber].name}`,'ghost','vulnerable')
+  }
+  removeGhost(ghostNumber)
+
+  function moveGhost(ghostNumber, nextPosition) { // move the ghost to the next cell
+    if (cells[nextPosition].classList.contains('pacman')) { // check to see if pacman is in next cell
+      if (powerUpState === true) { // check if pacman is in powerup state
+        removeGhost(ghostNumber) // ghost eaten by pacman - remove from location
+        sprites[ghostNumber].currentPos = sprites[ghostNumber].startPos // return ghost to starting location
+      } else { // if pacman not in powerup mode
+        removeLife() // remove life 
+        lives === 0 ? gameOver() : restartLevel() // check how many lives remain and act on it
+        return
+      } 
+    } else {
+      if (powerUpState) {
+        cells[nextPosition].classList.add(`${sprites[ghostNumber].name}`)
+        cells[nextPosition].classList.add('ghost')
+        cells[nextPosition].classList.add('vulnerable')
+      } else {
+        cells[nextPosition].classList.add(`${sprites[ghostNumber].name}`)
+        cells[nextPosition].classList.add('ghost')
+      }
+    }
+  }
+
+  let activeDirection = directions[Math.floor(Math.random() * directions.length)] // set an initial random starting direction to go
+  let sanityCheck = 0 // sanity check for while loop to be able to exit
+  function isNextCellAvailable() { // check if the next cell following that direction is available and adjust current position
+    if (activeDirection === 'ArrowRight' && sprites[ghostNumber].currentPos === 419) { // check if warping left
+      sprites[ghostNumber].currentPos = 392      
+      return true
+    } else if (activeDirection === 'ArrowLeft' && sprites[ghostNumber].currentPos === 392) { // check if warping right
+      sprites[ghostNumber].currentPos = 419
+      return true
+    } else if (activeDirection === 'ArrowUp' && !cells[sprites[ghostNumber].currentPos - stdWidth].classList.contains('oob')) { // check cell north
+      sprites[ghostNumber].currentPos -= stdWidth
+      return true
+    } else if (activeDirection === 'ArrowRight' && !cells[sprites[ghostNumber].currentPos + 1].classList.contains('oob')) { // check cell east
+      sprites[ghostNumber].currentPos++
+      return true
+    } else if (activeDirection === 'ArrowDown' && !cells[sprites[ghostNumber].currentPos + stdWidth].classList.contains('oob')) { // check cell south
+      sprites[ghostNumber].currentPos += stdWidth
+      return true
+    } else if (activeDirection === 'ArrowLeft' && !cells[sprites[ghostNumber].currentPos - 1].classList.contains('oob')) { // check cell west
+      sprites[ghostNumber].currentPos--
+      return true
+    } else {
+      return false
+    }
+  }
+  do { // move the ghost if it can
+    if (isNextCellAvailable()) { // set the new position if next cell is available
+      moveGhost(ghostNumber, sprites[ghostNumber].currentPos) // move the ghost
+      sanityCheck = 1 // get us out of the loop
+    } else {
+      activeDirection = directions[Math.floor(Math.random() * directions.length)] // set a new direction to go
+    }
+  } while (sanityCheck === 0)
+}
+```
 
 Once the building blocks of the game was developed, I moved onto the win/lose mechanism of the game where I worked on:
 - displaying available lives on screen,
